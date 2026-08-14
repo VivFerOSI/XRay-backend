@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AssessmentModule } from './assessment/assessment.module';
+import { StressTestModule } from './stress-test/stress-test.module';
 
 @Module({
   imports: [
@@ -24,9 +27,15 @@ import { AssessmentModule } from './assessment/assessment.module';
         synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true',
       }),
     }),
+    // Límite global de peticiones por IP (anti-abuso). 60 req/min por defecto.
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }]),
     AssessmentModule,
+    StressTestModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
 })
 export class AppModule {}
