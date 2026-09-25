@@ -14,6 +14,8 @@ export interface ScalePoint {
 export interface Question {
   id: number;
   text: string;
+  /** Si es true, el puntaje se invierte (5→1, 4→2, 3→3, 2→4, 1→5). */
+  reverse?: boolean;
 }
 
 export interface Band {
@@ -72,7 +74,7 @@ export const PILARES: Pilar[] = [
     name: 'Resiliencia Estratégica',
     questions: [
       { id: 1, text: 'Ningún cliente representa hoy más del 30% de mi facturación total.' },
-      { id: 2, text: 'Si mi producto o servicio principal cayera mañana, podría sostener la estructura con otras fuentes de ingreso.' },
+      { id: 2, text: 'Si mi producto o servicio principal cayera mañana, tengo otros que sostienen la estructura.' },
       { id: 3, text: 'Cuento con liquidez para cubrir al menos 4 meses de costos fijos si la facturación se detuviera.' },
       { id: 4, text: 'Mi negocio no depende de una sola ley, subsidio, plataforma o condición externa que no controlo.' },
       { id: 5, text: 'Tengo calculado, mes a mes, mi margen neto real después de pagarlo todo, incluido un sueldo razonable para mí.' },
@@ -88,17 +90,17 @@ export const PILARES: Pilar[] = [
     key: 'madurez',
     name: 'Madurez Operativa',
     questions: [
-      { id: 6, text: 'Puedo ausentarme 15 días sin que la operación requiera mi intervención para sostener calidad, tiempos y continuidad.' },
+      { id: 6, text: 'Puedo desconectarme 15 días sin que la operación se detenga o baje la calidad del servicio.' },
       { id: 7, text: 'Los procesos críticos de mi negocio están documentados de manera clara y actualizada.' },
-      { id: 8, text: 'Mi equipo puede ejecutar tareas clave con autonomía razonable sin depender de mi intervención permanente.' },
-      { id: 9, text: 'El conocimiento central del negocio no está concentrado solo en mi cabeza.' },
+      { id: 8, text: 'He capacitado a mi equipo para que ejecute tareas clave con autonomía, sin depender de mi intervención permanente.' },
+      { id: 9, text: 'Uso de forma sistemática herramientas de IA y automatización para optimizar o agilizar tareas y procesos clave de mi negocio.' },
       { id: 10, text: 'Tomamos decisiones basadas en métricas e informes periódicos, no solo intuición.' },
     ],
     bands: [
-      { min: 21, max: 25, title: 'Operación autónoma', text: 'Los procesos críticos están razonablemente documentados y el equipo puede sostener el trabajo sin depender de manera permanente del fundador. El conocimiento clave está más distribuido y la operación tiene capacidad de continuidad propia. Esto es una base muy favorable para crecer.' },
-      { min: 16, max: 20, title: 'Operación en consolidación', text: 'Hay orden y cierta delegación, pero todavía persisten algunos cuellos de botella. El negocio funciona, aunque el fundador sigue siendo importante para resolver temas clave o destrabar decisiones. El desafío está en seguir institucionalizando saberes y rutinas.' },
-      { min: 11, max: 15, title: 'Operación centralizada', text: 'La empresa todavía depende bastante del dueño para sostener calidad, resolver problemas o tomar decisiones. Existen procesos, pero no están instalados con suficiente autonomía. El trabajo de mejora debería enfocarse en documentación, seguimiento y delegación real.' },
-      { min: 5, max: 10, title: 'Operación dependiente del fundador', text: 'La continuidad del negocio está fuertemente atada a la presencia y energía del emprendedor. Si el líder se ausenta, la operación pierde fluidez o se desorganiza. En este nivel, hace falta construir sistema antes que escalar.' },
+      { min: 21, max: 25, title: 'Operación autónoma', text: 'Los procesos críticos están bien estructurados y apoyados en tecnología, automatización e IA. El equipo opera con autonomía sin depender de manera permanente del fundador, lo que distribuye el conocimiento clave y asegura la continuidad y escalabilidad del negocio.' },
+      { min: 16, max: 20, title: 'Operación en consolidación', text: 'Existe orden, cierta delegación y un aprovechamiento inicial de herramientas digitales, pero persisten cuellos de botella. El fundador sigue siendo indispensable para destrabar decisiones clave. El desafío está en profundizar la automatización e institucionalizar rutinas.' },
+      { min: 11, max: 15, title: 'Operación centralizada', text: 'El negocio depende en gran medida del dueño para sostener la calidad y resolver problemas. Aunque existen procesos o herramientas aisladas, no hay una sistemática de documentación, automatización ni delegación real. Conviene enfocarse en estandarizar y digitalizar la operación.' },
+      { min: 5, max: 10, title: 'Operación dependiente del fundador', text: 'La continuidad del negocio está atada a la presencia diaria y la energía del emprendedor, con escaso uso de procesos documentados o herramientas de automatización. Si el líder se ausenta, la operación pierde fluidez. En este nivel hace falta construir sistema antes que escalar.' },
     ],
   },
   {
@@ -122,11 +124,11 @@ export const PILARES: Pilar[] = [
     key: 'liderazgo',
     name: 'Liderazgo y Cultura',
     questions: [
-      { id: 16, text: 'Recibo feedback honesto de mi equipo o de personas de confianza con una frecuencia razonable.' },
+      { id: 16, text: 'Con frecuencia pido feedback honesto a mi equipo y estoy dispuesto/a a cambiar procesos a partir de lo que escucho.' },
       { id: 17, text: 'Los objetivos del negocio están claros para mi equipo y sabemos cómo se mide el avance.' },
-      { id: 18, text: 'Estoy dispuesto/a a modificar procesos cuando aparece evidencia de que algo puede hacerse mejor.' },
-      { id: 19, text: 'Cuando contrato asesoría externa, espero que aporte criterios útiles para cuestionar mis decisiones y mejorar resultados.' },
-      { id: 20, text: 'Soy consciente de que mis límites personales pueden estar frenando el crecimiento del negocio.' },
+      { id: 18, text: 'En mi negocio, mi equipo sabe que hay reconocimientos y beneficios pensados para quienes contribuyen al logro de los resultados.' },
+      { id: 19, text: 'Mis contratos con consultores tienen objetivos medibles, plazos de entrega y retorno esperado.' },
+      { id: 20, text: 'Siento con frecuencia que la operación diaria me satura y que puedo ser el principal cuello de botella de mi negocio.', reverse: true },
     ],
     bands: [
       { min: 21, max: 25, title: 'Liderazgo abierto y orientado al aprendizaje', text: 'El fundador muestra apertura al feedback, claridad para comunicar objetivos y disposición para revisar decisiones. El equipo puede crecer dentro de una cultura de mejora continua, y la asesoría externa tiene posibilidades reales de aportar valor. Este es un contexto muy favorable para coaching.' },
@@ -139,11 +141,11 @@ export const PILARES: Pilar[] = [
     key: 'crecimiento',
     name: 'Palancas de Crecimiento',
     questions: [
-      { id: 21, text: 'Mi propuesta de valor está clara y se entiende con facilidad.' },
-      { id: 22, text: 'Tengo al menos un canal de ventas o adquisición que funciona de forma relativamente previsible.' },
+      { id: 21, text: 'Mi propuesta de valor está tan bien definida que mi equipo y clientes la entienden sin esfuerzo.' },
+      { id: 22, text: 'Tengo al menos un canal de ventas o adquisición que funciona de forma relativamente estable y previsible.' },
       { id: 23, text: 'Dispongo de una rutina personal que me ayuda a priorizar lo importante y sostener mi productividad.' },
-      { id: 24, text: 'En mi negocio, los acuerdos y tareas relevantes se hacen seguimiento de manera sistemática.' },
-      { id: 25, text: 'Tomamos decisiones con indicadores que se revisan con cierta regularidad.' },
+      { id: 24, text: 'En mi negocio, hacemos seguimiento sistemático de los acuerdos y las tareas relevantes.' },
+      { id: 25, text: 'Tengo identificadas mis palancas de crecimiento (canales, productos, alianzas o mercados) y ejecuto acciones concretas en al menos una de ellas.' },
     ],
     bands: [
       { min: 21, max: 25, title: 'Crecimiento bien apalancado', text: 'La propuesta de valor está clara, hay señales de previsibilidad comercial y existe una base razonable de productividad, seguimiento e indicadores. El negocio no solo vende: también aprende, ordena y mejora. Este nivel muestra una capacidad real de escalar con criterio.' },

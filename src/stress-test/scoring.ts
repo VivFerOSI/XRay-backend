@@ -41,7 +41,12 @@ export function computeResult(
   norteKey: string,
 ): StressResult {
   const pilares: PilarResult[] = PILARES.map((p) => {
-    const score = p.questions.reduce((sum, q) => sum + (answers[q.id] ?? 0), 0);
+    const score = p.questions.reduce((sum, q) => {
+      const v = answers[q.id] ?? 0;
+      if (!v) return sum;
+      // Afirmaciones inversas (ej. la 20): 5→1, 4→2, 3→3, 2→4, 1→5.
+      return sum + (q.reverse ? 6 - v : v);
+    }, 0);
     const band = findBand(p.bands, score);
     return { key: p.key, name: p.name, score, bandTitle: band.title, bandText: band.text };
   });

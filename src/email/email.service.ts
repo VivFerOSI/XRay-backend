@@ -1,6 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import sgMail from '@sendgrid/mail';
+import { escapeHtml } from './escape-html';
+import {
+  renderStressTestResultEmail,
+  StressTestResultEmailData,
+} from './templates/stress-test-result.template';
+import {
+  renderStressTestLeadEmail,
+  StressTestLeadEmailData,
+} from './templates/stress-test-lead.template';
+import {
+  renderStressTestLeadText,
+  renderStressTestResultText,
+} from './templates/stress-test.text';
 
 export interface SendResultEmailParams {
   to: string;
@@ -11,51 +23,167 @@ export interface SendResultEmailParams {
   categories: { name: string; alignmentPct: number }[];
 }
 
+/** Endpoint transaccional de Brevo. */
+const BREVO_ENDPOINT = 'https://api.brevo.com/v3/smtp/email';
+
 /**
- * Envío de emails vía SendGrid. Si no hay SENDGRID_API_KEY configurada, el
- * servicio no falla: registra una advertencia y sigue (útil en desarrollo).
+ * Envío de emails vía Brevo (ex-Sendinblue), usando su API REST con el `fetch`
+ * nativo de Node: la SDK oficial no aporta nada para un solo endpoint.
+ *
+ * Si no hay BREVO_API_KEY configurada el servicio no falla: registra una
+ * advertencia y sigue (útil en desarrollo).
+ *
+ * El remitente debe estar verificado en Brevo (*Senders*); ver GCP_DEPLOY.md.
  */
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private readonly enabled: boolean;
+  private readonly apiKey?: string;
   private readonly from: { email: string; name: string };
+  /** Casilla interna que recibe el aviso de cada lead nuevo. */
+  private readonly leadsTo: string;
+  /** Base pública del frontend, para los enlaces de los correos. */
+  private readonly publicUrl: string;
 
   constructor(private readonly config: ConfigService) {
-    const apiKey = this.config.get<string>('SENDGRID_API_KEY');
-    this.enabled = !!apiKey;
-    if (this.enabled) {
-      sgMail.setApiKey(apiKey as string);
-    }
+    this.apiKey = this.config.get<string>('BREVO_API_KEY');
     this.from = {
-      email: this.config.get<string>('MAIL_FROM', 'no-reply@x-ray.com.ar'),
-      name: this.config.get<string>('MAIL_FROM_NAME', 'X-Ray Autoevaluacion'),
+      email: this.config.get<string>('MAIL_FROM', 'servicios1@x-ray.ar'),
+      name: this.config.get<string>('MAIL_FROM_NAME', 'X-Ray'),
     };
+    this.leadsTo = this.config.get<string>(
+      'LEADS_NOTIFICATION_EMAIL',
+      'servicios1@x-ray.ar',
+    );
+    this.publicUrl = this.config
+      .get<string>('PUBLIC_APP_URL', 'https://x-ray.ar')
+      .replace(/\/+$/, '');
   }
 
-  async sendResultEmail(params: SendResultEmailParams): Promise<boolean> {
-    if (!this.enabled) {
+  /** Enlace permanente al informe de un envío. */
+  private reportUrl(submissionId: string): string {
+    return `${this.publicUrl}/autoevaluacion/resultado/${submissionId}`;
+  }
+
+  /**
+   * Envío genérico. Nunca propaga el error: los datos ya quedaron guardados
+   * en la base y un fallo de correo no debe romper la respuesta al usuario.
+   */
+  private async send(msg: {
+    to: string;
+    subject: string;
+    html: string;
+    /** Alternativa en texto plano: baja el puntaje de spam del mensaje. */
+    text?: string;
+    replyTo?: string;
+    attachments?: { name: string; content: Buffer }[];
+  }): Promise<boolean> {
+    if (!this.apiKey) {
       this.logger.warn(
-        `SENDGRID_API_KEY ausente: se omite el email de resultados a ${params.to}`,
+        `BREVO_API_KEY ausente: se omite el email "${msg.subject}" a ${msg.to}`,
       );
       return false;
     }
 
     try {
-      await sgMail.send({
-        to: params.to,
-        from: this.from,
-        subject: 'Tus resultados — Autoevaluación de Competencias',
-        html: this.renderResultHtml(params),
+      const res = await fetch(BREVO_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'api-key': this.apiKey,
+          'content-type': 'application/json',
+          accept: 'application/json',
+        },
+        body: JSON.stringify({
+          sender: this.from,
+          to: [{ email: msg.to }],
+          ...(msg.replyTo ? { replyTo: { email: msg.replyTo } } : {}),
+          subject: msg.subject,
+          htmlContent: msg.html,
+          ...(msg.text ? { textContent: msg.text } : {}),
+          // Brevo espera los adjuntos en base64.
+          ...(msg.attachments?.length
+            ? {
+                attachment: msg.attachments.map((a) => ({
+                  name: a.name,
+                  content: a.content.toString('base64'),
+                })),
+              }
+            : {}),
+        }),
       });
+
+      if (!res.ok) {
+        // El cuerpo del error de Brevo trae el motivo real (remitente sin
+        // verificar, key inválida, cuota agotada...).
+        const detail = await res.text().catch(() => '');
+        this.logger.error(
+          `Brevo respondió ${res.status} al enviar a ${msg.to}: ${detail}`,
+        );
+        return false;
+      }
+
+      this.logger.log(`Email enviado a ${msg.to}: "${msg.subject}"`);
       return true;
     } catch (err) {
-      // No propagamos el error: el resultado ya quedó guardado en la DB.
       this.logger.error(
-        `Fallo al enviar email a ${params.to}: ${(err as Error).message}`,
+        `Fallo al enviar email a ${msg.to}: ${(err as Error).message}`,
       );
       return false;
     }
+  }
+
+  // ── Stress Test (Fase 2) ──
+
+  /** Devolución del Stress Test para quien lo completó. */
+  async sendStressTestResult(
+    data: StressTestResultEmailData & {
+      submissionId?: string;
+      pdf?: Buffer;
+      pdfName?: string;
+    },
+  ): Promise<boolean> {
+    const withUrl = {
+      ...data,
+      reportUrl: data.submissionId
+        ? this.reportUrl(data.submissionId)
+        : data.reportUrl,
+    };
+    return this.send({
+      to: data.to,
+      subject: `Tu diagnóstico X-Ray — ${data.nombreEmprendimiento}`,
+      html: renderStressTestResultEmail(withUrl),
+      text: renderStressTestResultText(withUrl),
+      attachments: data.pdf
+        ? [{ name: data.pdfName ?? 'informe-x-ray.pdf', content: data.pdf }]
+        : undefined,
+    });
+  }
+
+  /** Aviso interno a X-Ray por cada Stress Test completado. */
+  async sendStressTestLead(
+    data: StressTestLeadEmailData & { pdf?: Buffer; pdfName?: string },
+  ): Promise<boolean> {
+    const withUrl = { ...data, reportUrl: this.reportUrl(data.submissionId) };
+    return this.send({
+      to: this.leadsTo,
+      replyTo: data.email,
+      subject: `Nuevo lead Stress Test — ${data.nombreEmprendimiento} (${data.result.total}/${data.result.maxTotal})`,
+      html: renderStressTestLeadEmail(withUrl),
+      text: renderStressTestLeadText(withUrl),
+      attachments: data.pdf
+        ? [{ name: data.pdfName ?? 'informe-x-ray.pdf', content: data.pdf }]
+        : undefined,
+    });
+  }
+
+  // ── Autoevaluación de competencias (modelo anterior) ──
+
+  async sendResultEmail(params: SendResultEmailParams): Promise<boolean> {
+    return this.send({
+      to: params.to,
+      subject: 'Tus resultados — Autoevaluación de Competencias',
+      html: this.renderResultHtml(params),
+    });
   }
 
   private renderResultHtml(p: SendResultEmailParams): string {
@@ -91,13 +219,4 @@ export class EmailService {
       <p style="color:#64748b;font-size:12px;margin-top:24px">Este es un email automático. No respondas a esta casilla.</p>
     </div>`;
   }
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }

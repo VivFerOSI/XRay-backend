@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { StressTestService } from './stress-test.service';
 import { SubmitStressTestDto } from './dto/submit-stress-test.dto';
@@ -21,5 +28,16 @@ export class StressTestController {
   @Post('submit')
   submit(@Body() dto: SubmitStressTestDto) {
     return this.service.submit(dto);
+  }
+
+  /**
+   * Informe ya enviado, para el enlace permanente del correo. El UUID actúa
+   * como credencial (no es adivinable) y la respuesta no incluye datos de
+   * contacto. Límite bajo para desalentar el sondeo de ids.
+   */
+  @Throttle({ default: { limit: 20, ttl: 60000 } })
+  @Get('submission/:id')
+  submission(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.getSubmission(id);
   }
 }

@@ -7,9 +7,14 @@ substitutions:
   _DB_USER: xray_app
   _DB_NAME: xray
   # Dominios del frontend (Firebase Hosting) permitidos por CORS. Separados por coma.
-  _FRONTEND_ORIGIN: "https://big-cargo-469201-r1.web.app,https://big-cargo-469201-r1.firebaseapp.com"
-  _MAIL_FROM: no-reply@x-ray.com.ar
-  _MAIL_FROM_NAME: "X-Ray Autoevaluacion"
+  _FRONTEND_ORIGIN: "https://x-ray.ar,https://big-cargo-469201-r1.web.app,https://big-cargo-469201-r1.firebaseapp.com"
+  # Remitente: debe ser EXACTAMENTE la casilla verificada en Brevo (Senders).
+  _MAIL_FROM: servicios1@x-ray.ar
+  _MAIL_FROM_NAME: "X-Ray"
+  # Casilla interna que recibe el aviso de cada lead nuevo del Stress Test.
+  _LEADS_NOTIFICATION_EMAIL: servicios1@x-ray.ar
+  # Base publica del frontend, para el enlace al informe en los correos.
+  _PUBLIC_APP_URL: https://x-ray.ar
 
 steps:
   - name: gcr.io/cloud-builders/docker
@@ -40,15 +45,16 @@ steps:
       # Socket de Cloud SQL montado en /cloudsql/<INSTANCE_CONNECTION_NAME>
       - --add-cloudsql-instances
       - "${_SQL_INSTANCE}"
-      # Variables de entorno no sensibles
+      # Variables de entorno no sensibles. El prefijo ^|^ cambia el separador de "," a "|":
+      # _FRONTEND_ORIGIN lleva comas dentro del valor y los emails llevan "@".
       - --set-env-vars
-      - "DB_HOST=/cloudsql/${_SQL_INSTANCE},DB_PORT=5432,DB_USER=${_DB_USER},DB_NAME=${_DB_NAME},DB_SYNCHRONIZE=false,FRONTEND_ORIGIN=${_FRONTEND_ORIGIN},MAIL_FROM=${_MAIL_FROM},MAIL_FROM_NAME=${_MAIL_FROM_NAME}"
-      # Secretos gestionados en Secret Manager (crear con: gcloud secrets create ...)
-      # SendGrid queda fuera hasta tener la API key real: sin SENDGRID_API_KEY el
-      # EmailService se desactiva solo (ver email.service.ts). Cuando exista la key:
-      # crear el secreto `sendgrid-api-key` y agregar ",SENDGRID_API_KEY=sendgrid-api-key:latest".
+      - "^|^DB_HOST=/cloudsql/${_SQL_INSTANCE}|DB_PORT=5432|DB_USER=${_DB_USER}|DB_NAME=${_DB_NAME}|DB_SYNCHRONIZE=false|FRONTEND_ORIGIN=${_FRONTEND_ORIGIN}|MAIL_FROM=${_MAIL_FROM}|MAIL_FROM_NAME=${_MAIL_FROM_NAME}|LEADS_NOTIFICATION_EMAIL=${_LEADS_NOTIFICATION_EMAIL}|PUBLIC_APP_URL=${_PUBLIC_APP_URL}"
+      # Secretos gestionados en Secret Manager (crear con: gcloud secrets create ...).
+      # Si el secreto `brevo-api-key` no existe todavia, el deploy falla: quitar
+      # BREVO_API_KEY de esta linea o crearlo primero (ver GCP_DEPLOY.md, paso 3).
+      # Sin esa variable el EmailService se desactiva solo (ver email.service.ts).
       - --set-secrets
-      - "DB_PASSWORD=db-password:latest"
+      - "DB_PASSWORD=db-password:latest,BREVO_API_KEY=brevo-api-key:latest"
 
 images:
   - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_SERVICE}:${SHORT_SHA}"
