@@ -9,16 +9,10 @@ import { Repository } from 'typeorm';
 import { StressTestSubmission } from './stress-test.entity';
 import { SubmitStressTestDto } from './dto/submit-stress-test.dto';
 import { computeResult, StressResult } from './scoring';
+import { AssessmentsService } from './assessments.service';
+import { allQuestions, type Assessment } from './types';
 import { EmailService } from '../email/email.service';
 import { buildStressTestPdf } from '../pdf/stress-test-pdf';
-import {
-  ALL_QUESTIONS,
-  NORTE_OPTIONS,
-  NORTE_QUESTION,
-  ORG_FIELDS,
-  PILARES,
-  SCALE,
-} from './content';
 
 @Injectable()
 export class StressTestService {
@@ -28,22 +22,34 @@ export class StressTestService {
     @InjectRepository(StressTestSubmission)
     private readonly repo: Repository<StressTestSubmission>,
     private readonly email: EmailService,
+    private readonly assessments: AssessmentsService,
   ) {}
 
   /** Contenido para armar el formulario (sin puntajes ni textos de devolución). */
-  getContent() {
+  async getContent(key?: string) {
+    const a = await this.assessments.obtener(key);
     return {
-      title: 'Stress Test de Robustez y Crecimiento del Emprendimiento',
-      orgFields: ORG_FIELDS,
-      scale: SCALE,
-      pilares: PILARES.map((p) => ({
+      key: a.key,
+      title: a.title,
+      intro: a.intro,
+      // Presentación de la pantalla inicial. Opcionales: el cuestionario del
+      // emprendimiento sólo tiene `intro`.
+      nombrePublico: a.nombrePublico ?? a.title,
+      subtitulo: a.subtitulo,
+      orientadoA: a.orientadoA,
+      explora: a.explora,
+      aporta: a.aporta,
+      orgFieldsTitle: a.orgFieldsTitle,
+      orgFields: a.orgFields,
+      scale: a.scale,
+      pilares: a.pilares.map((p) => ({
         key: p.key,
         name: p.name,
         questions: p.questions,
       })),
       norte: {
-        question: NORTE_QUESTION,
-        options: NORTE_OPTIONS.map((o) => ({ key: o.key, label: o.label })),
+        question: a.norteQuestion,
+        options: a.norteOptions.map((o) => ({ key: o.key, label: o.label })),
       },
     };
   }
@@ -51,8 +57,8 @@ export class StressTestService {
   /**
    * Recupera un informe ya enviado, para el enlace permanente que va en el
    * correo (`/autoevaluacion/resultado/:id`). El resultado se recalcula desde
-   * las respuestas guardadas, así una corrección de textos o de bandas en
-   * `content.ts` se refleja también en los informes viejos.
+   * las respuestas guardadas, así una corrección de textos o de bandas en la
+   * definición del cuestionario se refleja también en los informes viejos.
    *
    * Solo devuelve lo necesario para mostrar la devolución: nada de email ni
    * teléfono, porque el enlace es público para quien tenga el UUID.
@@ -67,40 +73,70 @@ export class StressTestService {
     for (const [key, value] of Object.entries(submission.answers)) {
       answers[Number(key)] = value;
     }
+    const assessment = await this.assessments.obtener(submission.assessmentKey);
 
     return {
       id: submission.id,
+      assessmentKey: assessment.key,
       nombreEmprendimiento: submission.nombreEmprendimiento,
       nombreContacto: submission.nombreContacto,
       createdAt: submission.createdAt,
-      result: computeResult(answers, submission.norte),
+      result: computeResult(assessment, answers, submission.norte),
     };
   }
 
   /** Valida, calcula el resultado, guarda el envío y devuelve la devolución. */
-  async submit(dto: SubmitStressTestDto) {
+  async submit(dto: SubmitStressTestDto, key?: string) {
+    const assessment = await this.assessments.obtener(key ?? dto.assessmentKey);
+
     if (!dto.consent) {
       throw new BadRequestException(
         'Se requiere el consentimiento para el tratamiento de los datos de contacto.',
       );
     }
+    // Cada cuestionario decide qué datos de organización son obligatorios.
+    const valores = dto as unknown as Record<string, unknown>;
+    const faltantes = assessment.orgFields
+      .filter((f) => !f.optional)
+      .filter((f) => !String(valores[f.key] ?? '').trim())
+      .map((f) => f.label);
+    if (faltantes.length > 0) {
+      throw new BadRequestException(
+        `Faltan completar: ${faltantes.join(', ')}.`,
+      );
+    }
 
-    // Mapa questionId → valor, validando cobertura de las 25 preguntas.
+    if (!assessment.norteOptions.some((o) => o.key === dto.norte)) {
+      throw new BadRequestException(
+        `La opción de norte "${dto.norte}" no pertenece a esta autoevaluación.`,
+      );
+    }
+
+    // Mapa questionId → valor, validando cobertura de todas las preguntas.
     const answers: Record<number, number> = {};
     for (const a of dto.answers) {
       answers[a.questionId] = a.value;
     }
-    const expectedIds = ALL_QUESTIONS.map((q) => q.id);
+    const expectedIds = allQuestions(assessment).map((q) => q.id);
     const missing = expectedIds.filter((id) => answers[id] === undefined);
     if (missing.length > 0) {
       throw new BadRequestException(
         `Faltan respuestas para las preguntas: ${missing.join(', ')}.`,
       );
     }
+    const sobran = Object.keys(answers)
+      .map(Number)
+      .filter((id) => !expectedIds.includes(id));
+    if (sobran.length > 0) {
+      throw new BadRequestException(
+        `Hay respuestas que no corresponden a esta autoevaluación: ${sobran.join(', ')}.`,
+      );
+    }
 
-    const result = computeResult(answers, dto.norte);
+    const result = computeResult(assessment, answers, dto.norte);
 
     const submission = this.repo.create({
+      assessmentKey: assessment.key,
       nombreEmprendimiento: dto.nombreEmprendimiento,
       sector: dto.sector,
       antiguedad: dto.antiguedad,
@@ -113,13 +149,15 @@ export class StressTestService {
       answers: Object.fromEntries(
         Object.entries(answers).map(([k, v]) => [String(k), v]),
       ),
-      pilarScores: Object.fromEntries(result.pilares.map((p) => [p.key, p.score])),
+      pilarScores: Object.fromEntries(
+        result.pilares.map((p) => [p.key, p.score]),
+      ),
       totalScore: result.total,
       globalLevel: result.global.level,
     });
     const saved = await this.repo.save(submission);
 
-    await this.notify(saved, result);
+    await this.notify(saved, result, assessment);
 
     return { id: saved.id, result };
   }
@@ -135,9 +173,11 @@ export class StressTestService {
   private async notify(
     saved: StressTestSubmission,
     result: StressResult,
+    assessment: Assessment,
   ): Promise<void> {
     const norteLabel =
-      NORTE_OPTIONS.find((o) => o.key === saved.norte)?.label ?? saved.norte;
+      assessment.norteOptions.find((o) => o.key === saved.norte)?.label ??
+      saved.norte;
 
     // El informe adjunto va en ambos correos. Si la generación falla, se
     // manda igual el correo sin adjunto: mejor eso que perder el aviso.
@@ -154,8 +194,9 @@ export class StressTestService {
         `No se pudo generar el PDF de ${saved.id}: ${(err as Error).message}`,
       );
     }
-    const pdfName = `Informe X-Ray - ${saved.nombreEmprendimiento}.pdf`.replace(
-      /[\/:*?"<>|]/g,
+    const sujeto = saved.nombreEmprendimiento?.trim() || saved.nombreContacto;
+    const pdfName = `Informe X-Ray - ${sujeto}.pdf`.replace(
+      /[\\/:*?"<>|]/g,
       '',
     );
 

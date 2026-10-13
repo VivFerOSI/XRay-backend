@@ -31,8 +31,8 @@ function bandColor(score: number): string {
  * Barra de progreso con tablas anidadas: los clientes de correo (Outlook)
  * no renderizan divs con ancho porcentual de forma confiable.
  */
-function bar(score: number): string {
-  const pct = Math.round((score / 25) * 100);
+function bar(score: number, max: number): string {
+  const pct = Math.round((score / max) * 100);
   const color = bandColor(score);
   const filled = `<td width="${pct}%" height="10" style="background-color:${color};border-radius:5px;font-size:0;line-height:0;">&nbsp;</td>`;
   const rest =
@@ -47,8 +47,12 @@ export function renderStressTestResultEmail(
   d: StressTestResultEmailData,
 ): string {
   const r = d.result;
+  // Todos los pilares tienen la misma cantidad de preguntas.
+  const maxPilar = Math.round(r.maxTotal / r.pilares.length);
+  const titulo = r.assessmentTitle ?? 'Stress Test de Robustez y Crecimiento';
+  const corto = r.assessmentShortName ?? 'Stress Test';
 
-  const ctaText = `Hola, hice el Stress Test y mi resultado fue "${r.global.title}". Quiero conversar los próximos pasos.`;
+  const ctaText = `Hola, hice el ${corto} y mi resultado fue "${r.global.title}". Quiero conversar los próximos pasos.`;
   const ctaHref = `${WHATSAPP}?text=${encodeURIComponent(ctaText)}`;
 
   const semaforo = r.pilares
@@ -59,10 +63,10 @@ export function renderStressTestResultEmail(
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
               <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:${NAVY};padding-bottom:5px;">${escapeHtml(p.name)}</td>
-              <td align="right" style="font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;color:${bandColor(p.score)};padding-bottom:5px;">${p.score}/25 &middot; ${escapeHtml(p.bandTitle)}</td>
+              <td align="right" style="font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;color:${bandColor(p.score)};padding-bottom:5px;">${p.score}/${maxPilar} &middot; ${escapeHtml(p.bandTitle)}</td>
             </tr>
           </table>
-          ${bar(p.score)}
+          ${bar(p.score, maxPilar)}
         </td>
       </tr>`,
     )
@@ -77,7 +81,16 @@ export function renderStressTestResultEmail(
             <tr>
               <td style="padding:14px 18px;font-family:Arial,Helvetica,sans-serif;">
                 <p style="margin:0 0 6px 0;font-size:14px;font-weight:bold;color:${NAVY};">${escapeHtml(p.name)} &mdash; <span style="color:${bandColor(p.score)};">${escapeHtml(p.bandTitle)}</span></p>
-                <p style="margin:0;font-size:13px;line-height:20px;color:#4B5563;">${escapeHtml(p.bandText)}</p>
+                ${
+                  p.bandBullets?.length
+                    ? `<ul style="margin:6px 0 0 0;padding-left:18px;">${p.bandBullets
+                        .map(
+                          (b) =>
+                            `<li style="font-size:13px;line-height:20px;color:#4B5563;padding-bottom:5px;">${escapeHtml(b)}</li>`,
+                        )
+                        .join('')}</ul>`
+                    : `<p style="margin:0;font-size:13px;line-height:20px;color:#4B5563;">${escapeHtml(p.bandText)}</p>`
+                }
               </td>
             </tr>
           </table>
@@ -102,14 +115,18 @@ export function renderStressTestResultEmail(
         <tr>
           <td style="background-color:${NAVY};border-radius:10px 10px 0 0;padding:28px 32px;font-family:Arial,Helvetica,sans-serif;">
             <p style="margin:0;font-size:20px;font-weight:bold;color:#FFFFFF;letter-spacing:1px;">X<span style="color:${GOLD};">-</span>RAY</p>
-            <p style="margin:6px 0 0 0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${GOLD};">Stress Test de Robustez y Crecimiento</p>
+            <p style="margin:6px 0 0 0;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:${GOLD};">${escapeHtml(titulo)}</p>
           </td>
         </tr>
 
         <tr>
           <td style="background-color:#FFFFFF;padding:30px 32px 8px 32px;font-family:Arial,Helvetica,sans-serif;">
             <p style="margin:0 0 12px 0;font-size:16px;color:${NAVY};">Hola ${escapeHtml(d.nombreContacto)},</p>
-            <p style="margin:0;font-size:14px;line-height:22px;color:#4B5563;">Este es el diagn&oacute;stico de <strong style="color:${NAVY};">${escapeHtml(d.nombreEmprendimiento)}</strong> seg&uacute;n tus respuestas al Stress Test.</p>
+            <p style="margin:0;font-size:14px;line-height:22px;color:#4B5563;">${
+              d.nombreEmprendimiento?.trim()
+                ? `Este es el diagn&oacute;stico de <strong style="color:${NAVY};">${escapeHtml(d.nombreEmprendimiento.trim())}</strong> seg&uacute;n tus respuestas al ${escapeHtml(corto)}.`
+                : `Este es tu diagn&oacute;stico seg&uacute;n tus respuestas al ${escapeHtml(corto)}.`
+            }</p>
           </td>
         </tr>
 
@@ -127,6 +144,22 @@ export function renderStressTestResultEmail(
             </table>
           </td>
         </tr>
+
+        ${
+          r.lecturaGeneral?.length
+            ? `<tr>
+          <td style="background-color:#FFFFFF;padding:26px 32px 0 32px;font-family:Arial,Helvetica,sans-serif;">
+            <p style="margin:0 0 12px 0;font-size:16px;font-weight:bold;color:${NAVY};">Lectura general</p>
+            ${r.lecturaGeneral
+              .map(
+                (t) =>
+                  `<p style="margin:0 0 10px 0;font-size:13px;line-height:20px;color:#4B5563;">${escapeHtml(t)}</p>`,
+              )
+              .join('')}
+          </td>
+        </tr>`
+            : ''
+        }
 
         <tr>
           <td style="background-color:#FFFFFF;padding:26px 32px 6px 32px;font-family:Arial,Helvetica,sans-serif;">
@@ -152,7 +185,13 @@ export function renderStressTestResultEmail(
               <tr>
                 <td style="padding:18px 20px;">
                   <p style="margin:0 0 12px 0;font-size:13px;line-height:21px;color:#374151;">${escapeHtml(r.global.closing)}</p>
-                  <p style="margin:0;font-size:13px;line-height:21px;color:#374151;">${escapeHtml(r.norteClosing)}</p>
+                  ${
+                    r.cruce
+                      ? `<p style="margin:0 0 6px 0;font-size:13px;font-weight:bold;color:${GOLD};">${escapeHtml(r.cruce.lectura)}</p>
+                         <p style="margin:0 0 10px 0;font-size:13px;line-height:21px;color:#374151;">${escapeHtml(r.cruce.diagnostico)}</p>
+                         <p style="margin:0;font-size:13px;line-height:21px;color:#374151;"><strong style="color:${NAVY};">Primer paso:</strong> ${escapeHtml(r.cruce.primerPaso)}</p>`
+                      : `<p style="margin:0;font-size:13px;line-height:21px;color:#374151;">${escapeHtml(r.norteClosing)}</p>`
+                  }
                 </td>
               </tr>
             </table>

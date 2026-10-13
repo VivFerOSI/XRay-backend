@@ -47,6 +47,7 @@ function formatFecha(date: Date): string {
 /** Aviso interno a X-Ray por cada Stress Test completado (nuevo lead). */
 export function renderStressTestLeadEmail(d: StressTestLeadEmailData): string {
   const r = d.result;
+  const maxPilar = Math.round(r.maxTotal / r.pilares.length);
 
   // El pilar con menor puntaje: es el gancho para la conversación comercial.
   const masFlojo = r.pilares.reduce((min, p) => (p.score < min.score ? p : min));
@@ -56,7 +57,7 @@ export function renderStressTestLeadEmail(d: StressTestLeadEmailData): string {
       (p) => `
       <tr>
         <td style="padding:6px 0;border-bottom:1px solid #E5E7EB;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${NAVY};">${escapeHtml(p.name)}</td>
-        <td align="right" style="padding:6px 0;border-bottom:1px solid #E5E7EB;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;color:${bandColor(p.score)};">${p.score}/25</td>
+        <td align="right" style="padding:6px 0;border-bottom:1px solid #E5E7EB;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;color:${bandColor(p.score)};">${p.score}/${maxPilar}</td>
         <td align="right" style="padding:6px 0 6px 12px;border-bottom:1px solid #E5E7EB;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#6B7280;">${escapeHtml(p.bandTitle)}</td>
       </tr>`,
     )
@@ -81,8 +82,8 @@ export function renderStressTestLeadEmail(d: StressTestLeadEmailData): string {
 
         <tr>
           <td style="background-color:${NAVY};border-radius:10px 10px 0 0;padding:22px 28px;font-family:Arial,Helvetica,sans-serif;">
-            <p style="margin:0 0 4px 0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${GOLD};">Nuevo lead &middot; Stress Test</p>
-            <p style="margin:0;font-size:19px;font-weight:bold;color:#FFFFFF;">${escapeHtml(d.nombreEmprendimiento)}</p>
+            <p style="margin:0 0 4px 0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${GOLD};">Nuevo lead &middot; ${escapeHtml(r.assessmentShortName ?? 'Stress Test')}</p>
+            <p style="margin:0;font-size:19px;font-weight:bold;color:#FFFFFF;">${escapeHtml(d.nombreEmprendimiento?.trim() || d.nombreContacto)}</p>
           </td>
         </tr>
 
@@ -126,7 +127,7 @@ export function renderStressTestLeadEmail(d: StressTestLeadEmailData): string {
           <td style="padding:16px 28px 4px 28px;font-family:Arial,Helvetica,sans-serif;">
             <p style="margin:0 0 10px 0;font-size:13px;font-weight:bold;color:${NAVY};text-transform:uppercase;letter-spacing:1px;">Puntajes por pilar</p>
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${pilares}</table>
-            <p style="margin:12px 0 0 0;font-size:13px;line-height:20px;color:#374151;">Punto m&aacute;s d&eacute;bil: <strong style="color:${bandColor(masFlojo.score)};">${escapeHtml(masFlojo.name)}</strong> (${masFlojo.score}/25 &middot; ${escapeHtml(masFlojo.bandTitle)}).</p>
+            <p style="margin:12px 0 0 0;font-size:13px;line-height:20px;color:#374151;">Punto m&aacute;s d&eacute;bil: <strong style="color:${bandColor(masFlojo.score)};">${escapeHtml(masFlojo.name)}</strong> (${masFlojo.score}/${maxPilar} &middot; ${escapeHtml(masFlojo.bandTitle)}).</p>
           </td>
         </tr>
 

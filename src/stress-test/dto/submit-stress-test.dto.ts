@@ -19,7 +19,6 @@ import {
 export class StressAnswerInput {
   @IsInt()
   @Min(1)
-  @Max(25)
   questionId: number;
 
   @IsInt()
@@ -29,24 +28,34 @@ export class StressAnswerInput {
 }
 
 export class SubmitStressTestDto {
-  // ── Datos del emprendimiento ──
+  /**
+   * Cuestionario al que responde este envío. Opcional: si no viene, se toma
+   * el de la URL y, en su defecto, el cuestionario por defecto.
+   */
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
+  @MaxLength(40)
+  assessmentKey?: string;
+
+  // ── Datos del emprendimiento ──
+  /**
+   * Los datos de organización se validan en el servicio contra los
+   * `orgFields` del cuestionario: cuál es obligatorio depende de cada uno
+   * (en el de líderes, el nombre de la organización es opcional).
+   */
+  @IsString()
   @MaxLength(120)
   nombreEmprendimiento: string;
 
   @IsString()
-  @IsNotEmpty()
   @MaxLength(120)
   sector: string;
 
   @IsString()
-  @IsNotEmpty()
   @MaxLength(60)
   antiguedad: string;
 
   @IsString()
-  @IsNotEmpty()
   @MaxLength(60)
   tamanoEquipo: string;
 
@@ -69,12 +78,13 @@ export class SubmitStressTestDto {
   consent: boolean;
 
   // ── Respuestas ──
-  @IsIn(['aceleracion', 'estructura'])
+  @IsString()
+  @IsNotEmpty()
   norte: string;
 
   @IsArray()
-  @ArrayMinSize(25)
-  @ArrayMaxSize(25)
+  @ArrayMinSize(1)
+  @ArrayMaxSize(100)
   @ValidateNested({ each: true })
   @Type(() => StressAnswerInput)
   answers: StressAnswerInput[];

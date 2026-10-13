@@ -16,8 +16,8 @@ import type { StressTestLeadEmailData } from './stress-test-lead.template';
 const SEP = '='.repeat(56);
 
 /** Barra de progreso en ASCII, para conservar la lectura de un vistazo. */
-function bar(score: number): string {
-  const filled = Math.round((score / 25) * 20);
+function bar(score: number, max: number): string {
+  const filled = Math.round((score / max) * 20);
   return '#'.repeat(filled) + '.'.repeat(20 - filled);
 }
 
@@ -25,15 +25,19 @@ export function renderStressTestResultText(
   d: StressTestResultEmailData,
 ): string {
   const r = d.result;
+  const maxPilar = Math.round(r.maxTotal / r.pilares.length);
   const lines: string[] = [];
 
-  lines.push('X-RAY | Stress Test de Robustez y Crecimiento');
+  lines.push(`X-RAY | ${r.assessmentTitle ?? 'Stress Test de Robustez y Crecimiento'}`);
   lines.push(SEP);
   lines.push('');
   lines.push(`Hola ${d.nombreContacto},`);
   lines.push('');
+  const corto = r.assessmentShortName ?? 'Stress Test';
   lines.push(
-    `Este es el diagnóstico de ${d.nombreEmprendimiento} según tus respuestas al Stress Test.`,
+    d.nombreEmprendimiento?.trim()
+      ? `Este es el diagnóstico de ${d.nombreEmprendimiento.trim()} según tus respuestas al ${corto}.`
+      : `Este es tu diagnóstico según tus respuestas al ${corto}.`,
   );
   lines.push('');
   lines.push(`PUNTAJE GLOBAL: ${r.total} / ${r.maxTotal}`);
@@ -42,12 +46,21 @@ export function renderStressTestResultText(
   lines.push('');
   lines.push(r.global.text);
   lines.push('');
+  if (r.lecturaGeneral?.length) {
+    lines.push(SEP);
+    lines.push('LECTURA GENERAL');
+    for (const t of r.lecturaGeneral) {
+      lines.push('');
+      lines.push(t);
+    }
+    lines.push('');
+  }
   lines.push(SEP);
   lines.push('SEMÁFORO DE PILARES');
   lines.push('');
   for (const p of r.pilares) {
-    lines.push(`${p.name}: ${p.score}/25 · ${p.bandTitle}`);
-    lines.push(`  [${bar(p.score)}]`);
+    lines.push(`${p.name}: ${p.score}/${maxPilar} · ${p.bandTitle}`);
+    lines.push(`  [${bar(p.score, maxPilar)}]`);
   }
   lines.push('');
   lines.push(SEP);
@@ -55,14 +68,26 @@ export function renderStressTestResultText(
   for (const p of r.pilares) {
     lines.push('');
     lines.push(`${p.name} — ${p.bandTitle}`);
-    lines.push(p.bandText);
+    if (p.bandBullets?.length) {
+      for (const b of p.bandBullets) lines.push(`  - ${b}`);
+    } else {
+      lines.push(p.bandText);
+    }
   }
   lines.push('');
   lines.push(SEP);
   lines.push('');
   lines.push(r.global.closing);
   lines.push('');
-  lines.push(r.norteClosing);
+  if (r.cruce) {
+    lines.push(r.cruce.lectura);
+    lines.push('');
+    lines.push(r.cruce.diagnostico);
+    lines.push('');
+    lines.push(`Primer paso: ${r.cruce.primerPaso}`);
+  } else {
+    lines.push(r.norteClosing);
+  }
   lines.push('');
   lines.push('Agendar una conversación: https://wa.me/5491176766932');
   if (d.reportUrl) {
@@ -85,10 +110,11 @@ export function renderStressTestResultText(
 
 export function renderStressTestLeadText(d: StressTestLeadEmailData): string {
   const r = d.result;
+  const maxPilar = Math.round(r.maxTotal / r.pilares.length);
   const masFlojo = r.pilares.reduce((min, p) => (p.score < min.score ? p : min));
   const lines: string[] = [];
 
-  lines.push(`NUEVO LEAD · STRESS TEST — ${d.nombreEmprendimiento}`);
+  lines.push(`NUEVO LEAD · ${(r.assessmentShortName ?? 'STRESS TEST').toUpperCase()} — ${d.nombreEmprendimiento?.trim() || d.nombreContacto}`);
   lines.push(SEP);
   lines.push('');
   lines.push(`PUNTAJE: ${r.total} / ${r.maxTotal}`);
@@ -107,11 +133,11 @@ export function renderStressTestLeadText(d: StressTestLeadEmailData): string {
   lines.push('');
   lines.push('PUNTAJES POR PILAR');
   for (const p of r.pilares) {
-    lines.push(`  ${p.name}: ${p.score}/25 · ${p.bandTitle}`);
+    lines.push(`  ${p.name}: ${p.score}/${maxPilar} · ${p.bandTitle}`);
   }
   lines.push('');
   lines.push(
-    `Punto más débil: ${masFlojo.name} (${masFlojo.score}/25 · ${masFlojo.bandTitle}).`,
+    `Punto más débil: ${masFlojo.name} (${masFlojo.score}/${maxPilar} · ${masFlojo.bandTitle}).`,
   );
   lines.push('');
   lines.push('NORTE DE LIDERAZGO');

@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import type { GlobalLevel } from './content';
+import type { GlobalLevel } from './types';
 
 /**
  * Cada envío del Stress Test: datos del emprendimiento, contacto (lead),
@@ -12,6 +12,14 @@ export class StressTestSubmission {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  /**
+   * Cuestionario al que pertenece el envío ('emprendimiento', 'lider', ...).
+   * Los envíos anteriores al motor multicuestionario son de 'emprendimiento',
+   * de ahí el default.
+   */
+  @Column({ default: 'emprendimiento' })
+  assessmentKey: string;
 
   // ── Datos del emprendimiento ──
   @Column()

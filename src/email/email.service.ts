@@ -13,6 +13,14 @@ import {
   renderStressTestLeadText,
   renderStressTestResultText,
 } from './templates/stress-test.text';
+import {
+  renderComparativo360,
+  renderInvitacion360,
+  renderRecordatorio360,
+  renderSin360,
+  type Comparativo360EmailData,
+  type InvitacionData,
+} from './templates/evaluacion360.template';
 
 export interface SendResultEmailParams {
   to: string;
@@ -148,9 +156,13 @@ export class EmailService {
         ? this.reportUrl(data.submissionId)
         : data.reportUrl,
     };
+    // El nombre de la organización es opcional en algunos cuestionarios.
+    const sufijo = data.nombreEmprendimiento?.trim()
+      ? ` — ${data.nombreEmprendimiento.trim()}`
+      : '';
     return this.send({
       to: data.to,
-      subject: `Tu diagnóstico X-Ray — ${data.nombreEmprendimiento}`,
+      subject: `Tu diagnóstico X-Ray${sufijo}`,
       html: renderStressTestResultEmail(withUrl),
       text: renderStressTestResultText(withUrl),
       attachments: data.pdf
@@ -167,12 +179,52 @@ export class EmailService {
     return this.send({
       to: this.leadsTo,
       replyTo: data.email,
-      subject: `Nuevo lead Stress Test — ${data.nombreEmprendimiento} (${data.result.total}/${data.result.maxTotal})`,
+      subject: `Nuevo lead ${data.result.assessmentShortName ?? 'Stress Test'} — ${data.nombreEmprendimiento?.trim() || data.nombreContacto} (${data.result.total}/${data.result.maxTotal})`,
       html: renderStressTestLeadEmail(withUrl),
       text: renderStressTestLeadText(withUrl),
       attachments: data.pdf
         ? [{ name: data.pdfName ?? 'informe-x-ray.pdf', content: data.pdf }]
         : undefined,
+    });
+  }
+
+  // ── Evaluación 360° ──
+
+  /** Invitación a una persona para evaluar a otra. */
+  async sendInvitacion360(data: InvitacionData & { to: string }): Promise<boolean> {
+    return this.send({
+      to: data.to,
+      subject: `${data.nombreEvaluado} te invitó a aportar tu mirada`,
+      html: renderInvitacion360(data),
+    });
+  }
+
+  /** Recordatorio a quien todavía no respondió. */
+  async sendRecordatorio360(data: InvitacionData & { to: string }): Promise<boolean> {
+    return this.send({
+      to: data.to,
+      subject: `Recordatorio: la evaluación de ${data.nombreEvaluado}`,
+      html: renderRecordatorio360(data),
+    });
+  }
+
+  /** Informe comparativo para la persona evaluada. */
+  async sendComparativo360(
+    data: Comparativo360EmailData & { to: string },
+  ): Promise<boolean> {
+    return this.send({
+      to: data.to,
+      subject: 'Tu informe comparativo X-Ray — autoevaluación vs. tu equipo',
+      html: renderComparativo360(data),
+    });
+  }
+
+  /** Aviso de que la ronda venció sin respuestas. */
+  async sendSin360(data: { to: string; nombreContacto: string }): Promise<boolean> {
+    return this.send({
+      to: data.to,
+      subject: 'Tu evaluación 360° venció sin respuestas',
+      html: renderSin360(data.nombreContacto),
     });
   }
 

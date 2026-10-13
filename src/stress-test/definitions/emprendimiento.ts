@@ -1,58 +1,14 @@
 /**
- * Contenido del "Stress Test de Robustez y Crecimiento del Emprendimiento".
- * Fuente: Excel del cliente (V02 070826). Es la autoevaluación de la Fase 2.
+ * "Stress Test de Robustez y Crecimiento del Emprendimiento".
+ * Fuente: Excel del cliente (V02 070826), con las correcciones posteriores.
  *
- * 25 afirmaciones en 5 pilares (5 c/u), escala Likert 1–5.
- * Puntaje por pilar (5–25) con 4 bandas, y puntaje global (25–125) con 4 niveles.
+ * 25 afirmaciones en 5 pilares (5 c/u), escala Likert 1-5.
+ * Puntaje por pilar (5-25) con 4 bandas, y puntaje global (25-125) con 4 niveles.
  */
 
-export interface ScalePoint {
-  value: number;
-  label: string;
-}
+import type { Assessment, GlobalBand, NorteOption, Pilar, ScalePoint } from '../types';
 
-export interface Question {
-  id: number;
-  text: string;
-  /** Si es true, el puntaje se invierte (5→1, 4→2, 3→3, 2→4, 1→5). */
-  reverse?: boolean;
-}
-
-export interface Band {
-  min: number;
-  max: number;
-  title: string;
-  text: string;
-}
-
-export interface Pilar {
-  key: string;
-  name: string;
-  questions: Question[];
-  bands: Band[];
-}
-
-export type GlobalLevel = 'alto' | 'medio' | 'bajo' | 'muyBajo';
-
-export interface GlobalBand {
-  level: GlobalLevel;
-  min: number;
-  max: number;
-  title: string;
-  perfil: string;
-  text: string;
-  /** Párrafo de "llamada a la acción" según el nivel global. */
-  closing: string;
-}
-
-export interface NorteOption {
-  key: string;
-  label: string;
-  /** Cierre personalizado según el norte elegido. */
-  closing: string;
-}
-
-export const SCALE: ScalePoint[] = [
+const SCALE: ScalePoint[] = [
   { value: 1, label: 'Totalmente en desacuerdo' },
   { value: 2, label: 'En desacuerdo' },
   { value: 3, label: 'Ni de acuerdo ni en desacuerdo' },
@@ -61,14 +17,14 @@ export const SCALE: ScalePoint[] = [
 ];
 
 /** Datos del emprendimiento que se piden al inicio. */
-export const ORG_FIELDS = [
+const ORG_FIELDS = [
   { key: 'nombreEmprendimiento', label: 'Nombre del emprendimiento', placeholder: 'Ej.: Polaris' },
   { key: 'sector', label: 'Sector / rubro', placeholder: 'Ej.: Climatización, software, salud…' },
   { key: 'antiguedad', label: 'Antigüedad', placeholder: 'Ej.: 2 años' },
   { key: 'tamanoEquipo', label: 'Número de personas en el equipo', placeholder: 'Ej.: 8 personas' },
 ];
 
-export const PILARES: Pilar[] = [
+const PILARES: Pilar[] = [
   {
     key: 'resiliencia',
     name: 'Resiliencia Estratégica',
@@ -156,7 +112,7 @@ export const PILARES: Pilar[] = [
   },
 ];
 
-export const GLOBAL_BANDS: GlobalBand[] = [
+const GLOBAL_BANDS: GlobalBand[] = [
   {
     level: 'alto',
     min: 105,
@@ -195,9 +151,9 @@ export const GLOBAL_BANDS: GlobalBand[] = [
   },
 ];
 
-export const NORTE_QUESTION = '¿Cuál es el norte principal de tu liderazgo hoy?';
+const NORTE_QUESTION = '¿Cuál es el norte principal de tu liderazgo hoy?';
 
-export const NORTE_OPTIONS: NorteOption[] = [
+const NORTE_OPTIONS: NorteOption[] = [
   {
     key: 'aceleracion',
     label: 'Aceleración y Escala: quiero validar mi modelo, ganar mercado y hacer crecer el negocio de forma exponencial.',
@@ -210,5 +166,18 @@ export const NORTE_OPTIONS: NorteOption[] = [
   },
 ];
 
-/** Todas las preguntas en orden (1–25), derivadas de los pilares. */
-export const ALL_QUESTIONS: Question[] = PILARES.flatMap((p) => p.questions);
+export const EMPRENDIMIENTO: Assessment = {
+  key: 'emprendimiento',
+  title: 'Stress Test de Robustez y Crecimiento del Emprendimiento',
+  shortName: 'Stress Test',
+  intro:
+    '25 afirmaciones en 5 pilares. Respondé según cuánto coincidís con cada una (1 a 5). Al ' +
+    'finalizar vas a recibir tu nivel de robustez y una devolución por pilar. Toma unos 10 minutos.',
+  orgFieldsTitle: 'Sobre tu emprendimiento',
+  orgFields: ORG_FIELDS,
+  scale: SCALE,
+  pilares: PILARES,
+  globalBands: GLOBAL_BANDS,
+  norteQuestion: NORTE_QUESTION,
+  norteOptions: NORTE_OPTIONS,
+};

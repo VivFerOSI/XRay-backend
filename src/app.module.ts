@@ -8,6 +8,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AssessmentModule } from './assessment/assessment.module';
 import { StressTestModule } from './stress-test/stress-test.module';
+import { AdminModule } from './admin/admin.module';
+import { Evaluacion360Module } from './evaluacion360/evaluacion360.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { StressTestModule } from './stress-test/stress-test.module';
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }]),
     AssessmentModule,
     StressTestModule,
+    AdminModule,
+    Evaluacion360Module,
   ],
   controllers: [AppController],
   providers: [

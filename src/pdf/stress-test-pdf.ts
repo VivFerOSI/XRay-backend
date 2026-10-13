@@ -18,6 +18,26 @@ const LINE = '#E5E7EB';
 
 const PAGE_MARGIN = 48;
 
+/**
+ * Abre página nueva si el bloque no entra entero en la actual.
+ *
+ * Hace falta porque varios bloques escriben dos textos sobre la MISMA `y`
+ * (nombre a la izquierda, puntaje a la derecha): si el primero dispara el
+ * salto automático, el segundo sigue apuntando a una `y` que ya no existe en
+ * la hoja nueva y abre otra página de más.
+ */
+function ensureSpace(doc: PDFKit.PDFDocument, alto: number): void {
+  const limite = doc.page.height - doc.page.margins.bottom;
+  if (doc.y + alto > limite) doc.addPage();
+}
+
+/** Índice de la página actual: pdfkit no lo expone directamente. */
+function pageIndex(doc: PDFKit.PDFDocument): number {
+  return doc.bufferedPageRange
+    ? doc.bufferedPageRange().start + doc.bufferedPageRange().count
+    : 0;
+}
+
 /** Mismos cortes de semáforo que el mail y la pantalla. */
 function bandColor(score: number): string {
   if (score >= 21) return '#10B981';
@@ -55,6 +75,8 @@ export function buildStressTestPdf(d: StressTestPdfData): Promise<Buffer> {
 
     const r = d.result;
     const width = doc.page.width - PAGE_MARGIN * 2;
+    // Todos los pilares tienen la misma cantidad de preguntas.
+    const maxPilar = Math.round(r.maxTotal / r.pilares.length);
 
     // ── Encabezado ──
     doc.rect(0, 0, doc.page.width, 96).fill(NAVY);
@@ -70,10 +92,9 @@ export function buildStressTestPdf(d: StressTestPdfData): Promise<Buffer> {
     doc
       .fillColor(GOLD)
       .font('Helvetica')
-      .fontSize(9)
-      .text('STRESS TEST DE ROBUSTEZ Y CRECIMIENTO', PAGE_MARGIN, 60, {
-        characterSpacing: 1.5,
-      });
+      .fontSize(8)
+      .text((r.assessmentTitle ?? 'Stress Test de Robustez y Crecimiento').toUpperCase(),
+        PAGE_MARGIN, 62, { characterSpacing: 1.2, width: width - 20 });
 
     doc.y = 124;
 
@@ -82,7 +103,7 @@ export function buildStressTestPdf(d: StressTestPdfData): Promise<Buffer> {
       .fillColor(NAVY)
       .font('Helvetica-Bold')
       .fontSize(16)
-      .text(d.nombreEmprendimiento, PAGE_MARGIN, doc.y);
+      .text(d.nombreEmprendimiento?.trim() || d.nombreContacto, PAGE_MARGIN, doc.y);
     doc
       .fillColor(GREY)
       .font('Helvetica')
@@ -127,6 +148,24 @@ export function buildStressTestPdf(d: StressTestPdfData): Promise<Buffer> {
 
     doc.y = boxY + 136;
 
+    // ── Lectura general (cuestionarios que la definen) ──
+    if (r.lecturaGeneral?.length) {
+      doc
+        .fillColor(NAVY)
+        .font('Helvetica-Bold')
+        .fontSize(12)
+        .text('Lectura general', PAGE_MARGIN, doc.y, { paragraphGap: 8 });
+      doc.fillColor(TEXT).font('Helvetica').fontSize(9);
+      for (const parrafo of r.lecturaGeneral) {
+        doc.text(parrafo, PAGE_MARGIN, doc.y, {
+          width,
+          lineGap: 1.5,
+          paragraphGap: 6,
+        });
+      }
+      doc.y += 10;
+    }
+
     // ── Radar + barras ──
     doc
       .fillColor(NAVY)
@@ -138,27 +177,42 @@ export function buildStressTestPdf(d: StressTestPdfData): Promise<Buffer> {
     drawRadar(doc, r, PAGE_MARGIN + width / 2, radarTop + 108, 92);
     doc.y = radarTop + 232;
 
+    // Nombre a la izquierda y puntaje a la derecha, cada uno con su columna:
+    // con una sola columna los nombres y títulos largos se pisaban entre sí y
+    // empujaban la barra fuera de la página.
+    const colIzq = Math.round(width * 0.52);
+    const colDer = width - colIzq - 10;
     for (const p of r.pilares) {
+      const etiqueta = `${p.score}/${maxPilar} · ${p.bandTitle}`;
+
+      doc.font('Helvetica').fontSize(9.5);
+      const hIzq = doc.heightOfString(p.name, { width: colIzq });
+      doc.font('Helvetica-Bold').fontSize(9);
+      const hDer = doc.heightOfString(etiqueta, { width: colDer, align: 'right' });
+
+      ensureSpace(doc, Math.max(hIzq, hDer) + 29);
       const y = doc.y;
+
       doc
         .fillColor(NAVY)
         .font('Helvetica')
         .fontSize(9.5)
-        .text(p.name, PAGE_MARGIN, y);
+        .text(p.name, PAGE_MARGIN, y, { width: colIzq });
       doc
         .fillColor(bandColor(p.score))
         .font('Helvetica-Bold')
         .fontSize(9)
-        .text(`${p.score}/25 · ${p.bandTitle}`, PAGE_MARGIN, y, {
-          width,
+        .text(etiqueta, PAGE_MARGIN + colIzq + 10, y, {
+          width: colDer,
           align: 'right',
         });
-      const barY = y + 14;
+
+      const barY = y + Math.max(hIzq, hDer) + 4;
       doc.roundedRect(PAGE_MARGIN, barY, width, 7, 3.5).fill(LINE);
       doc
-        .roundedRect(PAGE_MARGIN, barY, (width * p.score) / 25, 7, 3.5)
+        .roundedRect(PAGE_MARGIN, barY, (width * p.score) / maxPilar, 7, 3.5)
         .fill(bandColor(p.score));
-      doc.y = barY + 19;
+      doc.y = barY + 18;
     }
 
     // ── Lectura por pilar ──
@@ -171,6 +225,7 @@ export function buildStressTestPdf(d: StressTestPdfData): Promise<Buffer> {
 
     for (const p of r.pilares) {
       const startY = doc.y;
+      const startPage = pageIndex(doc);
       doc
         .fillColor(NAVY)
         .font('Helvetica-Bold')
@@ -178,16 +233,32 @@ export function buildStressTestPdf(d: StressTestPdfData): Promise<Buffer> {
         .text(`${p.name} — `, PAGE_MARGIN + 12, startY, { continued: true })
         .fillColor(bandColor(p.score))
         .text(p.bandTitle);
-      doc
-        .fillColor(TEXT)
-        .font('Helvetica')
-        .fontSize(9)
-        .text(p.bandText, PAGE_MARGIN + 12, doc.y + 3, {
+
+      doc.fillColor(TEXT).font('Helvetica').fontSize(9);
+      if (p.bandBullets?.length) {
+        // `list` sigue el flujo normal y pagina solo; posicionar cada viñeta a
+        // mano rompía el salto de página automático y abría hojas de más.
+        doc.list(p.bandBullets, PAGE_MARGIN + 12, doc.y + 4, {
+          width: width - 12,
+          bulletRadius: 1.6,
+          textIndent: 10,
+          bulletIndent: 0,
+          lineGap: 1.5,
+          paragraphGap: 3,
+        });
+      } else {
+        doc.text(p.bandText, PAGE_MARGIN + 12, doc.y + 3, {
           width: width - 12,
           lineGap: 1.5,
         });
-      // Barra vertical de color a la izquierda del bloque.
-      doc.rect(PAGE_MARGIN, startY, 3, doc.y - startY).fill(bandColor(p.score));
+      }
+
+      // Barra vertical de color a la izquierda del bloque. Solo cuando el
+      // bloque entró entero en una página: si hubo salto, las coordenadas de
+      // arriba ya no corresponden a esta hoja.
+      if (pageIndex(doc) === startPage) {
+        doc.rect(PAGE_MARGIN, startY, 3, doc.y - startY).fill(bandColor(p.score));
+      }
       doc.y += 16;
     }
 
@@ -203,11 +274,28 @@ export function buildStressTestPdf(d: StressTestPdfData): Promise<Buffer> {
         lineGap: 2,
         paragraphGap: 8,
       });
-    doc.text(r.norteClosing, { width: width - 14, lineGap: 2 });
+    if (r.cruce) {
+      doc
+        .fillColor(GOLD)
+        .font('Helvetica-Bold')
+        .text(r.cruce.lectura, { width: width - 14, paragraphGap: 4 });
+      doc
+        .fillColor(TEXT)
+        .font('Helvetica')
+        .text(r.cruce.diagnostico, { width: width - 14, lineGap: 2, paragraphGap: 8 });
+      doc
+        .font('Helvetica-Bold')
+        .text('Primer paso: ', { continued: true })
+        .font('Helvetica')
+        .text(r.cruce.primerPaso, { width: width - 14, lineGap: 2 });
+    } else {
+      doc.text(r.norteClosing, { width: width - 14, lineGap: 2 });
+    }
     doc.rect(PAGE_MARGIN, cierreY, 3, doc.y - cierreY).fill(GOLD);
 
     // ── Pie ──
     doc.y += 24;
+    ensureSpace(doc, 46);
     doc
       .moveTo(PAGE_MARGIN, doc.y)
       .lineTo(PAGE_MARGIN + width, doc.y)
