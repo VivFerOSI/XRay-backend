@@ -303,6 +303,24 @@ export class AdminService {
     if (f.hasta) qb.andWhere('s.createdAt <= :hasta', { hasta: f.hasta });
     const filas = await qb.getMany();
 
+    // La planilla la abre una persona, no un programa: donde la base guarda
+    // "lider" o "aceleracion" hay que escribir el nombre del cuestionario y el
+    // norte tal como se leen en el sitio.
+    const definiciones = await this.assessments.listar();
+    const nombrePorKey = new Map(
+      definiciones.map((a) => [a.key, a.shortName || a.title]),
+    );
+    const nortePorKey = new Map(
+      definiciones.flatMap((a) =>
+        a.norteOptions.map((o): [string, string] => [
+          `${a.key}:${o.key}`,
+          // Las etiquetas son párrafos enteros; alcanza con el nombre, que es
+          // lo que va antes de los dos puntos.
+          o.label.split(':')[0].trim(),
+        ]),
+      ),
+    );
+
     // Los pilares varían según el cuestionario: se arma la cabecera con la
     // unión de todos los que aparezcan en el resultado.
     const pilares = [
@@ -330,7 +348,7 @@ export class AdminService {
         new Date(s.createdAt).toLocaleString('es-AR', {
           timeZone: 'America/Argentina/Buenos_Aires',
         }),
-        s.assessmentKey,
+        nombrePorKey.get(s.assessmentKey) ?? s.assessmentKey,
         s.nombreContacto,
         s.email,
         s.telefono ?? '',
@@ -338,7 +356,7 @@ export class AdminService {
         s.sector,
         s.antiguedad,
         s.tamanoEquipo,
-        s.norte,
+        nortePorKey.get(`${s.assessmentKey}:${s.norte}`) ?? s.norte,
         s.totalScore,
         s.globalLevel,
         ...pilares.map((p) => s.pilarScores?.[p] ?? ''),
