@@ -114,8 +114,30 @@ export function buildStressTestPdf(d: StressTestPdfData): Promise<Buffer> {
       );
 
     // ── Puntaje global ──
+    //
+    // La caja se mide antes de dibujarla. Con una altura fija, las devoluciones
+    // largas —las que traen "Capital / Riesgo / Foco de coaching"— se salían
+    // del borde dorado y se montaban sobre la sección siguiente.
     const boxY = doc.y;
-    doc.roundedRect(PAGE_MARGIN, boxY, width, 118, 6).lineWidth(1).stroke(GOLD);
+    const anchoCaja = width - 36;
+    doc.font('Helvetica-Bold').fontSize(12);
+    const hTitulo = doc.heightOfString(r.global.title, { width: anchoCaja });
+    doc.font('Helvetica-Bold').fontSize(9);
+    const hPerfil = r.global.perfil
+      ? doc.heightOfString(r.global.perfil, { width: anchoCaja }) + 2
+      : 0;
+    doc.font('Helvetica').fontSize(9);
+    const hTexto = doc.heightOfString(r.global.text, {
+      width: anchoCaja,
+      lineGap: 1.5,
+    });
+    // 54 es donde arranca el título, debajo del puntaje grande.
+    const altoCaja = 54 + hTitulo + hPerfil + 4 + hTexto + 16;
+
+    doc
+      .roundedRect(PAGE_MARGIN, boxY, width, altoCaja, 6)
+      .lineWidth(1)
+      .stroke(GOLD);
     doc
       .fillColor(GOLD)
       .font('Helvetica-Bold')
@@ -146,7 +168,7 @@ export function buildStressTestPdf(d: StressTestPdfData): Promise<Buffer> {
         lineGap: 1.5,
       });
 
-    doc.y = boxY + 136;
+    doc.y = boxY + altoCaja + 18;
 
     // ── Lectura general (cuestionarios que la definen) ──
     if (r.lecturaGeneral?.length) {
@@ -167,6 +189,32 @@ export function buildStressTestPdf(d: StressTestPdfData): Promise<Buffer> {
     }
 
     // ── Radar + barras ──
+    //
+    // Nombre a la izquierda y puntaje a la derecha, cada uno con su columna:
+    // con una sola columna los nombres y títulos largos se pisaban entre sí y
+    // empujaban la barra fuera de la página.
+    const colIzq = Math.round(width * 0.52);
+    const colDer = width - colIzq - 10;
+
+    /** Alto de una fila del semáforo: el texto más alto, la barra y el aire. */
+    const altoFila = (p: (typeof r.pilares)[number]): number => {
+      doc.font('Helvetica').fontSize(9.5);
+      const izq = doc.heightOfString(p.name, { width: colIzq });
+      doc.font('Helvetica-Bold').fontSize(9);
+      const der = doc.heightOfString(`${p.score}/${maxPilar} · ${p.bandTitle}`, {
+        width: colDer,
+        align: 'right',
+      });
+      return Math.max(izq, der) + 29;
+    };
+
+    // El bloque entero —título, radar y las cinco barras— se mide primero y se
+    // reserva de una vez. Si se deja que cada fila pida su espacio por
+    // separado, el radar queda en una página y las barras en la siguiente.
+    const altoSemaforo =
+      22 + 232 + r.pilares.reduce((total, p) => total + altoFila(p), 0);
+    ensureSpace(doc, altoSemaforo);
+
     doc
       .fillColor(NAVY)
       .font('Helvetica-Bold')
@@ -177,11 +225,6 @@ export function buildStressTestPdf(d: StressTestPdfData): Promise<Buffer> {
     drawRadar(doc, r, PAGE_MARGIN + width / 2, radarTop + 108, 92);
     doc.y = radarTop + 232;
 
-    // Nombre a la izquierda y puntaje a la derecha, cada uno con su columna:
-    // con una sola columna los nombres y títulos largos se pisaban entre sí y
-    // empujaban la barra fuera de la página.
-    const colIzq = Math.round(width * 0.52);
-    const colDer = width - colIzq - 10;
     for (const p of r.pilares) {
       const etiqueta = `${p.score}/${maxPilar} · ${p.bandTitle}`;
 
@@ -216,12 +259,18 @@ export function buildStressTestPdf(d: StressTestPdfData): Promise<Buffer> {
     }
 
     // ── Lectura por pilar ──
-    doc.addPage();
+    //
+    // Arranca donde haya lugar en vez de abrir página sí o sí: reservar el
+    // semáforo entero deja aire al final de la página anterior, y forzar un
+    // salto acá lo dejaría en blanco. Se pide espacio para el encabezado más
+    // el primer bloque, para no cortar justo después del título.
+    doc.y += 14;
+    ensureSpace(doc, 110);
     doc
       .fillColor(NAVY)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('Lectura por pilar', PAGE_MARGIN, PAGE_MARGIN, { paragraphGap: 12 });
+      .text('Lectura por pilar', PAGE_MARGIN, doc.y, { paragraphGap: 12 });
 
     for (const p of r.pilares) {
       const startY = doc.y;
@@ -356,11 +405,13 @@ function drawRadar(
     const [x, y] = point(i, (r.pilares[i].score / 25) * radius);
     doc.circle(x, y, 2.5).fill(GOLD);
   }
-  // Etiquetas: la primera palabra del pilar, como en el radar de la web.
+  // Etiquetas: la primera palabra del pilar, como en el radar de la web. Se le
+  // quita la puntuación final, si no "Continuidad, Coaching y Seguimiento"
+  // queda como "Continuidad," con la coma colgando.
   doc.font('Helvetica').fontSize(7.5).fillColor('#4B5563');
   for (let i = 0; i < n; i++) {
     const [x, y] = point(i, radius + 16);
-    const label = r.pilares[i].name.split(' ')[0];
+    const label = r.pilares[i].name.split(' ')[0].replace(/[,.;:]+$/, '');
     doc.text(label, x - 34, y - 4, { width: 68, align: 'center' });
   }
 }
