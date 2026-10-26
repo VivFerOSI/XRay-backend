@@ -70,11 +70,36 @@ const PILARES: Pilar[] = [
     key: 'objetividad',
     name: 'Objetividad, Evidencias y Criterios Claros',
     questions: [
-      { id: 1, text: 'Registro de forma periódica hechos concretos, logros y evidencias observables de la persona evaluada durante todo el año.' },
-      { id: 2, text: 'Fundamento mis calificaciones en indicadores u objetivos previamente acordados y no en impresiones generales.' },
-      { id: 3, text: 'Evalúo el desempeño basándome en el estándar esperado para el rol y no en comparaciones entre colaboradores.' },
-      { id: 4, text: 'Documento tanto los aciertos destacados como las desviaciones específicas para explicarlos con precisión durante la reunión.' },
-      { id: 5, text: 'Reviso la descripción del puesto y las metas vigentes antes de redactar la evaluación final.' },
+      {
+        id: 1,
+        text: 'Registro de forma periódica hechos concretos, logros y evidencias observables de la persona evaluada durante todo el año.',
+        textoTercera:
+          'Registra de forma periódica hechos concretos, logros y evidencias observables de la persona evaluada durante todo el año.',
+      },
+      {
+        id: 2,
+        text: 'Fundamento mis calificaciones en indicadores u objetivos previamente acordados y no en impresiones generales.',
+        textoTercera:
+          'Fundamenta sus calificaciones en indicadores u objetivos previamente acordados y no en impresiones generales.',
+      },
+      {
+        id: 3,
+        text: 'Evalúo el desempeño basándome en el estándar esperado para el rol y no en comparaciones entre colaboradores.',
+        textoTercera:
+          'Evalúa el desempeño basándose en el estándar esperado para el rol y no en comparaciones entre colaboradores.',
+      },
+      {
+        id: 4,
+        text: 'Documento tanto los aciertos destacados como las desviaciones específicas para explicarlos con precisión durante la reunión.',
+        textoTercera:
+          'Documenta tanto los aciertos destacados como las desviaciones específicas para explicarlos con precisión durante la reunión.',
+      },
+      {
+        id: 5,
+        text: 'Reviso la descripción del puesto y las metas vigentes antes de redactar la evaluación final.',
+        textoTercera:
+          'Revisa la descripción del puesto y las metas vigentes antes de redactar la evaluación final.',
+      },
     ],
     bands: [
       {
@@ -131,11 +156,36 @@ const PILARES: Pilar[] = [
     key: 'imparcialidad',
     name: 'Conciencia Imparcial y Control de Sesgos',
     questions: [
-      { id: 6, text: 'Evito que un incidente reciente (positivo o negativo) condicione la valoración de todo el periodo anual.' },
-      { id: 7, text: 'Distingo claramente entre la calidad del desempeño profesional y la simpatía personal hacia el evaluado.' },
-      { id: 8, text: 'Mantengo una ponderación equilibrada, evitando que una fortaleza o debilidad puntual invalide el resto de las competencias (efecto halo).' },
-      { id: 9, text: 'Reconozco mis propios prejuicios o supuestos previos para evitar que influyan en la calificación final.' },
-      { id: 10, text: 'Muestro apertura para revisar y ajustar mi apreciación inicial si el colaborador aporta datos o matices válidos.' },
+      {
+        id: 6,
+        text: 'Evito que un incidente reciente (positivo o negativo) condicione la valoración de todo el periodo anual.',
+        textoTercera:
+          'Evita que un incidente reciente (positivo o negativo) condicione la valoración de todo el periodo anual.',
+      },
+      {
+        id: 7,
+        text: 'Distingo claramente entre la calidad del desempeño profesional y la simpatía personal hacia el evaluado.',
+        textoTercera:
+          'Distingue claramente entre la calidad del desempeño profesional y la simpatía personal hacia el evaluado.',
+      },
+      {
+        id: 8,
+        text: 'Mantengo una ponderación equilibrada, evitando que una fortaleza o debilidad puntual invalide el resto de las competencias (efecto halo).',
+        textoTercera:
+          'Mantiene una ponderación equilibrada, evitando que una fortaleza o debilidad puntual invalide el resto de las competencias (efecto halo).',
+      },
+      {
+        id: 9,
+        text: 'Reconozco mis propios prejuicios o supuestos previos para evitar que influyan en la calificación final.',
+        textoTercera:
+          'Reconoce sus propios prejuicios o supuestos previos para evitar que influyan en la calificación final.',
+      },
+      {
+        id: 10,
+        text: 'Muestro apertura para revisar y ajustar mi apreciación inicial si el colaborador aporta datos o matices válidos.',
+        textoTercera:
+          'Muestra apertura para revisar y ajustar su apreciación inicial si el colaborador aporta datos o matices válidos.',
+      },
     ],
     bands: [
       {
@@ -192,11 +242,36 @@ const PILARES: Pilar[] = [
     key: 'entrevista',
     name: 'Conducción de la Entrevista y Calidad del Feedback',
     questions: [
-      { id: 11, text: 'Garantizo un espacio y un tiempo adecuados, sin interrupciones, para realizar la reunión de devolución con dedicación exclusiva.' },
-      { id: 12, text: 'Explicito al inicio de la reunión que el objetivo es el aprendizaje y el desarrollo mutuo, y no un espacio de juzgamiento o sanción.' },
-      { id: 13, text: 'Utilizo preguntas abiertas que invitan al colaborador a reflexionar sobre su propio desempeño antes de emitir mi postura.' },
-      { id: 14, text: 'Comunico las oportunidades de mejora con asertividad y claridad, manteniendo el foco en las conductas y no en la persona.' },
-      { id: 15, text: 'Mantengo la calma, la empatía y el control de la conversación ante posibles desacuerdos o reacciones defensivas.' },
+      {
+        id: 11,
+        text: 'Garantizo un espacio y un tiempo adecuados, sin interrupciones, para realizar la reunión de devolución con dedicación exclusiva.',
+        textoTercera:
+          'Garantiza un espacio y un tiempo adecuados, sin interrupciones, para realizar la reunión de devolución con dedicación exclusiva.',
+      },
+      {
+        id: 12,
+        text: 'Explicito al inicio de la reunión que el objetivo es el aprendizaje y el desarrollo mutuo, y no un espacio de juzgamiento o sanción.',
+        textoTercera:
+          'Explicita al inicio de la reunión que el objetivo es el aprendizaje y el desarrollo mutuo, y no un espacio de juzgamiento o sanción.',
+      },
+      {
+        id: 13,
+        text: 'Utilizo preguntas abiertas que invitan al colaborador a reflexionar sobre su propio desempeño antes de emitir mi postura.',
+        textoTercera:
+          'Utiliza preguntas abiertas que invitan al colaborador a reflexionar sobre su propio desempeño antes de emitir su postura.',
+      },
+      {
+        id: 14,
+        text: 'Comunico las oportunidades de mejora con asertividad y claridad, manteniendo el foco en las conductas y no en la persona.',
+        textoTercera:
+          'Comunica las oportunidades de mejora con asertividad y claridad, manteniendo el foco en las conductas y no en la persona.',
+      },
+      {
+        id: 15,
+        text: 'Mantengo la calma, la empatía y el control de la conversación ante posibles desacuerdos o reacciones defensivas.',
+        textoTercera:
+          'Mantiene la calma, la empatía y el control de la conversación ante posibles desacuerdos o reacciones defensivas.',
+      },
     ],
     bands: [
       {
@@ -253,11 +328,36 @@ const PILARES: Pilar[] = [
     key: 'acuerdos',
     name: 'Co-creación de Acuerdos y Planes de Desarrollo – PDI',
     questions: [
-      { id: 16, text: 'Transformo las oportunidades de mejora detectadas en objetivos de desarrollo concretos, medibles y viables.' },
-      { id: 17, text: 'Construyo el Plan de Desarrollo Individual (PDI) en conjunto con el colaborador, promoviendo su compromiso activo.' },
-      { id: 18, text: 'Asumo compromisos explícitos de apoyo (recursos, formación, mentoría o desbloqueo de obstáculos) para acompañar el plan.' },
-      { id: 19, text: 'Establezco metas de aprendizaje desafiantes pero alcanzables, alineadas con el potencial de la persona y las necesidades del área.' },
-      { id: 20, text: 'Cierro la reunión con acuerdos por escrito claros, plazos definidos y el entendimiento compartido sobre los pasos a seguir.' },
+      {
+        id: 16,
+        text: 'Transformo las oportunidades de mejora detectadas en objetivos de desarrollo concretos, medibles y viables.',
+        textoTercera:
+          'Transforma las oportunidades de mejora detectadas en objetivos de desarrollo concretos, medibles y viables.',
+      },
+      {
+        id: 17,
+        text: 'Construyo el Plan de Desarrollo Individual (PDI) en conjunto con el colaborador, promoviendo su compromiso activo.',
+        textoTercera:
+          'Construye el Plan de Desarrollo Individual (PDI) en conjunto con el colaborador, promoviendo su compromiso activo.',
+      },
+      {
+        id: 18,
+        text: 'Asumo compromisos explícitos de apoyo (recursos, formación, mentoría o desbloqueo de obstáculos) para acompañar el plan.',
+        textoTercera:
+          'Asume compromisos explícitos de apoyo (recursos, formación, mentoría o desbloqueo de obstáculos) para acompañar el plan.',
+      },
+      {
+        id: 19,
+        text: 'Establezco metas de aprendizaje desafiantes pero alcanzables, alineadas con el potencial de la persona y las necesidades del área.',
+        textoTercera:
+          'Establece metas de aprendizaje desafiantes pero alcanzables, alineadas con el potencial de la persona y las necesidades del área.',
+      },
+      {
+        id: 20,
+        text: 'Cierro la reunión con acuerdos por escrito claros, plazos definidos y el entendimiento compartido sobre los pasos a seguir.',
+        textoTercera:
+          'Cierra la reunión con acuerdos por escrito claros, plazos definidos y el entendimiento compartido sobre los pasos a seguir.',
+      },
     ],
     bands: [
       {
@@ -314,11 +414,36 @@ const PILARES: Pilar[] = [
     key: 'continuidad',
     name: 'Continuidad, Coaching y Seguimiento Anual',
     questions: [
-      { id: 21, text: 'Sostengo espacios de coaching y seguimiento periódicos (1-a-1) durante el año para revisar objetivos y avances del PDI, y no solo al cierre anual.' },
-      { id: 22, text: 'Proporciono retroalimentación oportuna en el momento en que ocurren los hechos, evitando acumular observaciones para la reunión formal.' },
-      { id: 23, text: 'Ajusto los objetivos de desempeño y el PDI cuando las prioridades del área o las condiciones del contexto sufren cambios significativos' },
-      { id: 24, text: 'Reconozco y visibilizo el esfuerzo y los avances intermedios del equipo a lo largo del periodo, sin esperar a la evaluación anual.' },
-      { id: 25, text: 'Utilizo los resultados del proceso de evaluación para tomar decisiones estratégicas de desarrollo, rotación o reconocimiento en el área.' },
+      {
+        id: 21,
+        text: 'Sostengo espacios de coaching y seguimiento periódicos (1-a-1) durante el año para revisar objetivos y avances del PDI, y no solo al cierre anual.',
+        textoTercera:
+          'Sostiene espacios de coaching y seguimiento periódicos (1-a-1) durante el año para revisar objetivos y avances del PDI, y no solo al cierre anual.',
+      },
+      {
+        id: 22,
+        text: 'Proporciono retroalimentación oportuna en el momento en que ocurren los hechos, evitando acumular observaciones para la reunión formal.',
+        textoTercera:
+          'Proporciona retroalimentación oportuna en el momento en que ocurren los hechos, evitando acumular observaciones para la reunión formal.',
+      },
+      {
+        id: 23,
+        text: 'Ajusto los objetivos de desempeño y el PDI cuando las prioridades del área o las condiciones del contexto sufren cambios significativos',
+        textoTercera:
+          'Ajusta los objetivos de desempeño y el PDI cuando las prioridades del área o las condiciones del contexto sufren cambios significativos.',
+      },
+      {
+        id: 24,
+        text: 'Reconozco y visibilizo el esfuerzo y los avances intermedios del equipo a lo largo del periodo, sin esperar a la evaluación anual.',
+        textoTercera:
+          'Reconoce y visibiliza el esfuerzo y los avances intermedios del equipo a lo largo del periodo, sin esperar a la evaluación anual.',
+      },
+      {
+        id: 25,
+        text: 'Utilizo los resultados del proceso de evaluación para tomar decisiones estratégicas de desarrollo, rotación o reconocimiento en el área.',
+        textoTercera:
+          'Utiliza los resultados del proceso de evaluación para tomar decisiones estratégicas de desarrollo, rotación o reconocimiento en el área.',
+      },
     ],
     bands: [
       {

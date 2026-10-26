@@ -76,11 +76,36 @@ const PILARES: Pilar[] = [
     key: 'direccion',
     name: 'Dirección, Alineación Estratégica y Foco',
     questions: [
-      { id: 1, text: 'Comprendo con claridad los objetivos estratégicos de la organización y puedo explicárselos a mi equipo de manera sencilla.' },
-      { id: 2, text: 'Traduzco las metas de la empresa en prioridades operativas concretas y alcanzables para mi área.' },
-      { id: 3, text: 'Reviso periódicamente el foco de trabajo de mi equipo y ajusto prioridades para evitar la dispersión.' },
-      { id: 4, text: 'Tomo decisiones cotidianas coherentes con el rumbo estratégico de la compañía, incluso bajo presión.' },
-      { id: 5, text: 'Negocio recursos y discuto prioridades con la dirección para garantizar el cumplimiento de los objetivos de mi área.' },
+      {
+        id: 1,
+        text: 'Comprendo con claridad los objetivos estratégicos de la organización y puedo explicárselos a mi equipo de manera sencilla.',
+        textoTercera:
+          'Comprende con claridad los objetivos estratégicos de la organización y puede explicárselos a su equipo de manera sencilla.',
+      },
+      {
+        id: 2,
+        text: 'Traduzco las metas de la empresa en prioridades operativas concretas y alcanzables para mi área.',
+        textoTercera:
+          'Traduce las metas de la empresa en prioridades operativas concretas y alcanzables para su área.',
+      },
+      {
+        id: 3,
+        text: 'Reviso periódicamente el foco de trabajo de mi equipo y ajusto prioridades para evitar la dispersión.',
+        textoTercera:
+          'Revisa periódicamente el foco de trabajo de su equipo y ajusta prioridades para evitar la dispersión.',
+      },
+      {
+        id: 4,
+        text: 'Tomo decisiones cotidianas coherentes con el rumbo estratégico de la compañía, incluso bajo presión.',
+        textoTercera:
+          'Toma decisiones cotidianas coherentes con el rumbo estratégico de la compañía, incluso bajo presión.',
+      },
+      {
+        id: 5,
+        text: 'Negocio recursos y discuto prioridades con la dirección para garantizar el cumplimiento de los objetivos de mi área.',
+        textoTercera:
+          'Negocia recursos y discute prioridades con la dirección para garantizar el cumplimiento de los objetivos de su área.',
+      },
     ],
     bands: [
       {
@@ -137,11 +162,36 @@ const PILARES: Pilar[] = [
     key: 'comunicacion',
     name: 'Comunicación, Confianza y Seguridad Psicológica',
     questions: [
-      { id: 6, text: 'Comunico de manera transparente a mi equipo los cambios, expectativas y decisiones que los afectan.' },
-      { id: 7, text: 'Fomento un clima donde el equipo puede expresar ideas, dudas o errores sin temor a represalias.' },
-      { id: 8, text: 'Abordo a tiempo los conflictos y las conversaciones difíciles sobre desempeño o conducta.' },
-      { id: 9, text: 'Escucho activamente las sugerencias y desacuerdos de mi equipo antes de decidir.' },
-      { id: 10, text: 'Promuevo en mi equipo el compromiso con la calidad y los plazos de entrega pactados.' },
+      {
+        id: 6,
+        text: 'Comunico de manera transparente a mi equipo los cambios, expectativas y decisiones que los afectan.',
+        textoTercera:
+          'Comunica de manera transparente a su equipo los cambios, expectativas y decisiones que los afectan.',
+      },
+      {
+        id: 7,
+        text: 'Fomento un clima donde el equipo puede expresar ideas, dudas o errores sin temor a represalias.',
+        textoTercera:
+          'Fomenta un clima donde el equipo puede expresar ideas, dudas o errores sin temor a represalias.',
+      },
+      {
+        id: 8,
+        text: 'Abordo a tiempo los conflictos y las conversaciones difíciles sobre desempeño o conducta.',
+        textoTercera:
+          'Aborda a tiempo los conflictos y las conversaciones difíciles sobre desempeño o conducta.',
+      },
+      {
+        id: 9,
+        text: 'Escucho activamente las sugerencias y desacuerdos de mi equipo antes de decidir.',
+        textoTercera:
+          'Escucha activamente las sugerencias y desacuerdos de su equipo antes de decidir.',
+      },
+      {
+        id: 10,
+        text: 'Promuevo en mi equipo el compromiso con la calidad y los plazos de entrega pactados.',
+        textoTercera:
+          'Promueve en su equipo el compromiso con la calidad y los plazos de entrega pactados.',
+      },
     ],
     bands: [
       {
@@ -198,11 +248,36 @@ const PILARES: Pilar[] = [
     key: 'resultados',
     name: 'Gestión de Resultados, Mejora Continua e IA',
     questions: [
-      { id: 11, text: 'Establezco indicadores claros para medir el avance y el éxito del trabajo de mi área.' },
-      { id: 12, text: 'Hago seguimiento periódico de los indicadores y entregables de mi área.' },
-      { id: 13, text: 'Asumo la responsabilidad final por los errores o incumplimientos de mi área, sin trasladar la culpa a otros.' },
-      { id: 14, text: 'Incorporo herramientas digitales e inteligencia artificial disponible para optimizar los procesos y la toma de decisiones de mi área.' },
-      { id: 15, text: 'Propongo e impulso mejoras e innovaciones en los procesos y servicios de mi área.' },
+      {
+        id: 11,
+        text: 'Establezco indicadores claros para medir el avance y el éxito del trabajo de mi área.',
+        textoTercera:
+          'Establece indicadores claros para medir el avance y el éxito del trabajo de su área.',
+      },
+      {
+        id: 12,
+        text: 'Hago seguimiento periódico de los indicadores y entregables de mi área.',
+        textoTercera:
+          'Hace seguimiento periódico de los indicadores y entregables de su área.',
+      },
+      {
+        id: 13,
+        text: 'Asumo la responsabilidad final por los errores o incumplimientos de mi área, sin trasladar la culpa a otros.',
+        textoTercera:
+          'Asume la responsabilidad final por los errores o incumplimientos de su área, sin trasladar la culpa a otros.',
+      },
+      {
+        id: 14,
+        text: 'Incorporo herramientas digitales e inteligencia artificial disponible para optimizar los procesos y la toma de decisiones de mi área.',
+        textoTercera:
+          'Incorpora herramientas digitales e inteligencia artificial disponible para optimizar los procesos y la toma de decisiones de su área.',
+      },
+      {
+        id: 15,
+        text: 'Propongo e impulso mejoras e innovaciones en los procesos y servicios de mi área.',
+        textoTercera:
+          'Propone e impulsa mejoras e innovaciones en los procesos y servicios de su área.',
+      },
     ],
     bands: [
       {
@@ -259,11 +334,36 @@ const PILARES: Pilar[] = [
     key: 'desarrollo',
     name: 'Desarrollo, Delegación, Autonomía y Stakeholders',
     questions: [
-      { id: 16, text: 'Delego tareas importantes y doy margen de decisión a mis colaboradores.' },
-      { id: 17, text: 'Mi equipo puede sostener la operación con calidad si me ausento por varios días.' },
-      { id: 18, text: 'Identifico las necesidades de capacitación de mi equipo y gestiono soluciones concretas para su desarrollo profesional.' },
-      { id: 19, text: 'Brindo las herramientas y recursos necesarios para que mi equipo trabaje con autonomía.' },
-      { id: 20, text: 'Gestiono de forma activa las relaciones con otras áreas, clientes internos/externos y proveedores para cumplir los objetivos de mi área.' },
+      {
+        id: 16,
+        text: 'Delego tareas importantes y doy margen de decisión a mis colaboradores.',
+        textoTercera:
+          'Delega tareas importantes y da margen de decisión a sus colaboradores.',
+      },
+      {
+        id: 17,
+        text: 'Mi equipo puede sostener la operación con calidad si me ausento por varios días.',
+        textoTercera:
+          'Su equipo puede sostener la operación con calidad si se ausenta por varios días.',
+      },
+      {
+        id: 18,
+        text: 'Identifico las necesidades de capacitación de mi equipo y gestiono soluciones concretas para su desarrollo profesional.',
+        textoTercera:
+          'Identifica las necesidades de capacitación de su equipo y gestiona soluciones concretas para su desarrollo profesional.',
+      },
+      {
+        id: 19,
+        text: 'Brindo las herramientas y recursos necesarios para que mi equipo trabaje con autonomía.',
+        textoTercera:
+          'Brinda las herramientas y recursos necesarios para que su equipo trabaje con autonomía.',
+      },
+      {
+        id: 20,
+        text: 'Gestiono de forma activa las relaciones con otras áreas, clientes internos/externos y proveedores para cumplir los objetivos de mi área.',
+        textoTercera:
+          'Gestiona de forma activa las relaciones con otras áreas, clientes internos/externos y proveedores para cumplir los objetivos de su área.',
+      },
     ],
     bands: [
       {
@@ -320,11 +420,36 @@ const PILARES: Pilar[] = [
     key: 'autogestion',
     name: 'Autogestión, Resiliencia, Criterio y Ética',
     questions: [
-      { id: 21, text: 'Mantengo el autocontrol y la claridad de criterio ante crisis y cambios abruptos de prioridad.' },
-      { id: 22, text: 'Reviso y modifico mis opiniones o decisiones cuando la evidencia muestra una alternativa mejor.' },
-      { id: 23, text: 'Reconozco mis límites y pido ayuda cuando un problema supera mi capacidad o conocimiento.' },
-      { id: 24, text: 'Actúo conforme a los valores éticos de la organización, incluso cuando esto implica costos personales o para mi área.' },
-      { id: 25, text: 'Busco activamente feedback de superiores, pares y colaboradores sobre mi desempeño como líder.' },
+      {
+        id: 21,
+        text: 'Mantengo el autocontrol y la claridad de criterio ante crisis y cambios abruptos de prioridad.',
+        textoTercera:
+          'Mantiene el autocontrol y la claridad de criterio ante crisis y cambios abruptos de prioridad.',
+      },
+      {
+        id: 22,
+        text: 'Reviso y modifico mis opiniones o decisiones cuando la evidencia muestra una alternativa mejor.',
+        textoTercera:
+          'Revisa y modifica sus opiniones o decisiones cuando la evidencia muestra una alternativa mejor.',
+      },
+      {
+        id: 23,
+        text: 'Reconozco mis límites y pido ayuda cuando un problema supera mi capacidad o conocimiento.',
+        textoTercera:
+          'Reconoce sus límites y pide ayuda cuando un problema supera su capacidad o conocimiento.',
+      },
+      {
+        id: 24,
+        text: 'Actúo conforme a los valores éticos de la organización, incluso cuando esto implica costos personales o para mi área.',
+        textoTercera:
+          'Actúa conforme a los valores éticos de la organización, incluso cuando esto implica costos personales o para su área.',
+      },
+      {
+        id: 25,
+        text: 'Busco activamente feedback de superiores, pares y colaboradores sobre mi desempeño como líder.',
+        textoTercera:
+          'Busca activamente feedback de superiores, pares y colaboradores sobre su desempeño como líder.',
+      },
     ],
     bands: [
       {
