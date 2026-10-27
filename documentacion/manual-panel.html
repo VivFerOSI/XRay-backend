@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light">
+<title>X-Ray · Guía del panel de administración</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #16243a;
+    --navy-claro: #24354f;
+    --dorado: #c8922a;
+    --texto: #1f2937;
+    --tenue: #6b7280;
+    --linea: #e5e7eb;
+  }
+
+  @page { size: A4; margin: 18mm 16mm; }
+  @page :first { margin: 0; }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.6;
+    color: var(--texto);
+  }
+
+  /* ── Portada ── */
+  .portada {
+    height: 297mm;
+    background: var(--navy);
+    color: #fff;
+    padding: 45mm 22mm 20mm;
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+  }
+  .marca {
+    font-family: 'Playfair Display', serif;
+    font-size: 34pt;
+    font-weight: 700;
+    letter-spacing: -0.5pt;
+  }
+  .marca span { color: var(--dorado); }
+  .bajada-marca {
+    font-size: 8pt;
+    letter-spacing: 3pt;
+    text-transform: uppercase;
+    color: var(--dorado);
+    margin-top: 2mm;
+  }
+  .portada h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 30pt;
+    line-height: 1.15;
+    font-weight: 700;
+    margin: 55mm 0 0;
+  }
+  .portada .sub {
+    font-size: 12pt;
+    color: rgba(255,255,255,.72);
+    margin-top: 6mm;
+    max-width: 120mm;
+  }
+  .filete { width: 22mm; height: 2px; background: var(--dorado); margin: 10mm 0; }
+  .portada .pie {
+    margin-top: auto;
+    font-size: 9pt;
+    color: rgba(255,255,255,.55);
+  }
+  .portada .pie strong { color: rgba(255,255,255,.85); font-weight: 600; }
+
+  /* ── Texto ── */
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18pt;
+    color: var(--navy);
+    margin: 0 0 4mm;
+    padding-bottom: 2.5mm;
+    border-bottom: 2px solid var(--dorado);
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 11.5pt;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 7mm 0 2mm;
+    page-break-after: avoid;
+  }
+  p { margin: 0 0 3mm; }
+  ul { margin: 0 0 3mm; padding-left: 5mm; }
+  li { margin-bottom: 1.5mm; }
+  strong { color: var(--navy); font-weight: 600; }
+  section { margin-bottom: 9mm; }
+  section.salto { page-break-before: always; }
+
+  /* ── Elementos ── */
+  .pasos { counter-reset: paso; list-style: none; padding: 0; margin: 0 0 4mm; }
+  .pasos li {
+    counter-increment: paso;
+    position: relative;
+    padding-left: 9mm;
+    margin-bottom: 2.5mm;
+  }
+  .pasos li::before {
+    content: counter(paso);
+    position: absolute;
+    left: 0;
+    top: 0.3mm;
+    width: 6mm;
+    height: 6mm;
+    border-radius: 50%;
+    background: var(--dorado);
+    color: #fff;
+    font-size: 8.5pt;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 4mm;
+    font-size: 10pt;
+  }
+  th {
+    background: var(--navy);
+    color: #fff;
+    text-align: left;
+    padding: 2.5mm 3mm;
+    font-weight: 600;
+    font-size: 9.5pt;
+  }
+  td { padding: 2.5mm 3mm; border-bottom: 1px solid var(--linea); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+
+  .aviso {
+    border-left: 3px solid var(--dorado);
+    background: #fdf8ef;
+    padding: 3mm 4mm;
+    margin: 0 0 4mm;
+    page-break-inside: avoid;
+  }
+  .aviso p:last-child { margin-bottom: 0; }
+
+  .captura {
+    margin: 3mm 0 5mm;
+    page-break-inside: avoid;
+  }
+  .captura img {
+    width: 100%;
+    border: 1px solid var(--linea);
+    border-radius: 2mm;
+    display: block;
+  }
+  .captura figcaption {
+    font-size: 8.5pt;
+    color: var(--tenue);
+    margin-top: 1.5mm;
+    text-align: center;
+  }
+
+  .faq { page-break-inside: avoid; margin-bottom: 4mm; }
+  .faq .preg { font-weight: 600; color: var(--navy); margin-bottom: 0.5mm; }
+  .faq .resp { margin: 0; color: var(--texto); }
+
+  .logo-klg { display: block; }
+  /* En la portada va sólo el isotipo: la bajada del logo es gris oscuro y
+     sobre el navy no se leería. */
+  .portada .pie .logo-klg { height: 17mm; margin-bottom: 4mm; }
+  .cierre .logo-klg { height: 13mm; margin-top: 3mm; }
+
+  .cierre {
+    margin-top: 8mm;
+    padding-top: 4mm;
+    border-top: 1px solid var(--linea);
+    font-size: 9pt;
+    color: var(--tenue);
+  }
+
+  /* ── En pantalla: simula la hoja impresa ── */
+  @media screen {
+    html { background: #e8eaed; color-scheme: light; }
+    body { padding: 10mm 0; }
+    .portada,
+    .hoja {
+      width: 210mm;
+      margin: 0 auto 8mm;
+      background: #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,.14);
+    }
+    .portada { min-height: 297mm; }
+    .hoja { padding: 18mm 16mm; }
+    .portada { background: var(--navy); }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="portada">
+  <div>
+    <div class="marca">X<span>-</span>RAY</div>
+    <div class="bajada-marca">Consultoría organizacional</div>
+  </div>
+  <h1>Guía del panel<br>de administración</h1>
+  <div class="filete"></div>
+  <p class="sub">Cómo ver los resultados de las autoevaluaciones, exportarlos,
+     editar los cuestionarios y seguir las evaluaciones 360°.</p>
+  <div class="pie">
+    <img class="logo-klg" src="logo-klg-iso.png" alt="KLG">
+    Octubre de 2026
+  </div>
+</div>
+
+<div class="hoja">
+<section>
+  <h2>Cómo entrar</h2>
+  <ol class="pasos">
+    <li>Abrí <strong>x-ray.ar/admin</strong></li>
+    <li>Ingresá con tu correo y tu contraseña</li>
+  </ol>
+  <p>La sesión dura 8 horas. Pasado ese tiempo te vuelve a pedir los datos, y es
+     normal: no significa que algo haya fallado.</p>
+  <p>A la izquierda vas a encontrar tres secciones: <strong>Cuestionarios</strong>,
+     <strong>Resultados</strong> y <strong>Evaluaciones 360°</strong>.</p>
+  <!--CAPTURA:login-->
+</section>
+
+<section>
+  <h2>Resultados</h2>
+  <p>Es la lista de todas las personas que completaron una autoevaluación, de la
+     más reciente a la más antigua. De cada una ves la fecha, el nombre, el
+     correo, la organización, qué cuestionario respondió y el puntaje.</p>
+  <p>El color del puntaje indica el nivel de un vistazo: verde es alto, amarillo
+     medio, naranja bajo y rojo muy bajo.</p>
+  <!--CAPTURA:resultados-->
+
+  <h3>Buscar a alguien en particular</h3>
+  <p>Arriba de la lista hay tres filtros que se combinan entre sí:</p>
+  <ul>
+    <li><strong>Cuestionario</strong>: para ver solo quienes hicieron uno de los tres</li>
+    <li><strong>Desde</strong> y <strong>Hasta</strong>: para acotar por fechas</li>
+  </ul>
+
+  <h3>Ver el detalle de una persona</h3>
+  <p>Hacé clic en el nombre. Se abre su ficha con:</p>
+  <ul>
+    <li>Los datos de contacto, con accesos directos para escribirle por correo o por WhatsApp</li>
+    <li>El puntaje total y el nivel alcanzado</li>
+    <li>El detalle pilar por pilar, con la banda en la que cayó cada uno</li>
+    <li>El norte que eligió</li>
+    <li><strong>El historial</strong>: si esa persona respondió más de una vez, aparecen
+        todas sus evaluaciones. Sirve para ver la evolución entre una y otra.</li>
+  </ul>
+  <!--CAPTURA:detalle-->
+
+  <h3>Exportar a Excel</h3>
+  <p>El botón <strong>Exportar a Excel</strong>, arriba a la derecha, baja un archivo
+     con todo lo que estés viendo en pantalla. Si pusiste filtros, el archivo
+     respeta esos filtros.</p>
+  <div class="aviso">
+    <p><strong>Conviene filtrar por cuestionario antes de exportar.</strong> Cada
+       cuestionario tiene sus propios pilares; si exportás todos juntos, el archivo
+       trae las columnas de los tres y muchas quedan vacías.</p>
+  </div>
+  <p>El archivo se abre directamente en Excel, con los acentos correctos.</p>
+</section>
+
+<section class="salto">
+  <h2>Cuestionarios</h2>
+  <p>Acá podés cambiar lo que dice cada cuestionario.
+     <strong>Los cambios se ven en el sitio al instante</strong>, sin esperar a que
+     nosotros publiquemos nada.</p>
+  <!--CAPTURA:cuestionarios-->
+  <p>Entrá a uno con <strong>Editar</strong> y vas a poder modificar:</p>
+  <ul>
+    <li>El <strong>título</strong> y el <strong>texto de la pantalla inicial</strong></li>
+    <li>El <strong>nombre de cada pilar</strong></li>
+    <li>Cada una de las <strong>25 afirmaciones</strong></li>
+    <li>El <strong>orden</strong>, con las flechas que están a la derecha de cada pilar
+        y de cada afirmación</li>
+  </ul>
+  <p>Los cambios no se guardan solos: cuando modificás algo, abajo aparece el botón
+     <strong>Guardar cambios</strong>. Si intentás salir sin guardar, el navegador
+     te avisa.</p>
+  <!--CAPTURA:editor-->
+
+  <h3>Qué conviene tener en cuenta</h3>
+  <div class="aviso">
+    <p><strong>Si agregás o quitás afirmaciones, cambia el puntaje máximo.</strong>
+       Con 5 afirmaciones un pilar va de 5 a 25 puntos; con 6, de 6 a 30. Los textos
+       de devolución están escritos para ciertos rangos, así que si cambia la
+       cantidad hay que revisarlos. El panel no te deja guardar si algún puntaje
+       posible quedaría sin devolución.</p>
+  </div>
+  <ul>
+    <li><strong>Las evaluaciones ya respondidas no se tocan.</strong> Si editás un
+        texto, los informes anteriores se muestran con la redacción nueva, pero los
+        puntajes no cambian.</li>
+    <li>Si cambiás una afirmación, acordate de revisar también su
+        <strong>versión en tercera persona</strong>, que es la que leen quienes
+        participan de un 360°.</li>
+  </ul>
+</section>
+
+<section class="salto">
+  <h2>Evaluaciones 360°</h2>
+  <p>Una evaluación 360° es cuando alguien que ya hizo su autoevaluación invita a
+     hasta <strong>3 personas de su equipo</strong> a responder las mismas
+     afirmaciones, pero sobre ella. Después se compara una mirada con la otra.</p>
+
+  <h3>Cómo empieza</h3>
+  <p>La persona termina su autoevaluación y, al pie de su informe, encuentra un
+     bloque para invitar a su equipo. Carga nombres y correos, y cada invitado
+     recibe un enlace propio.</p>
+  <p><strong>Vos no tenés que hacer nada para que esto ocurra.</strong> El panel es
+     para seguirlo.</p>
+  <!--CAPTURA:lista360-->
+
+  <h3>Qué ves en el listado</h3>
+  <p>Cada fila es una ronda: quién la inició, cuántas personas invitó, cuántas
+     respondieron, en qué estado está y cuánto falta para que venza.</p>
+  <table>
+    <tr><th style="width:28%">Estado</th><th>Qué significa</th></tr>
+    <tr><td><strong>Abierta</strong></td><td>Todavía se están juntando respuestas</td></tr>
+    <tr><td><strong>Cerrada</strong></td><td>Respondieron todos, o venció el plazo. El informe ya se envió.</td></tr>
+    <tr><td><strong>Vencida</strong></td><td>Pasó el plazo sin que respondiera nadie</td></tr>
+  </table>
+
+  <h3>El comparativo</h3>
+  <p>Al entrar a una ronda ves quién respondió y cuándo, y debajo la comparación:</p>
+  <ul>
+    <li><strong>Su autoevaluación</strong> contra <strong>el promedio del equipo</strong>,
+        y la diferencia</li>
+    <li><strong>Punto ciego</strong>: el pilar donde más se puntúa por encima de lo que
+        lo ve su equipo</li>
+    <li><strong>Fortaleza oculta</strong>: donde el equipo lo valora más de lo que se valora</li>
+    <li>El detalle pilar por pilar, en dorado su mirada y en celeste la del equipo</li>
+  </ul>
+  <!--CAPTURA:comparativo-->
+  <div class="aviso">
+    <p><strong>Las respuestas de cada evaluador son anónimas.</strong> A los invitados
+       se les promete que solo se ve el promedio, así que ni el panel ni el informe
+       muestran quién puso qué. Sí ves quién respondió y quién no.</p>
+  </div>
+
+  <h3>Los plazos</h3>
+  <ul>
+    <li>Los invitados tienen <strong>7 días</strong> para responder</li>
+    <li>A los <strong>3 días</strong> de no responder reciben un recordatorio, y como
+        máximo reciben <strong>2</strong></li>
+    <li>Cuando responden todos, la ronda se cierra sola y el informe comparativo se
+        envía por correo</li>
+    <li>Si vence el plazo con algunas respuestas, se cierra igual y se envía con lo
+        que haya</li>
+    <li>Si vence sin ninguna respuesta, se avisa en lugar de mandar un informe vacío</li>
+  </ul>
+</section>
+
+<section class="salto">
+  <h2>Preguntas frecuentes</h2>
+
+  <div class="faq">
+    <p class="preg">¿Me sigue llegando el aviso cuando alguien completa una autoevaluación?</p>
+    <p class="resp">Sí, a servicios1@x-ray.ar, con el informe de la persona. El panel no
+       reemplaza eso: sirve para consultar todo junto cuando lo necesites.</p>
+  </div>
+
+  <div class="faq">
+    <p class="preg">Edité un cuestionario, ¿cuándo se ve?</p>
+    <p class="resp">En cuanto apretás Guardar.</p>
+  </div>
+
+  <div class="faq">
+    <p class="preg">¿Puedo volver atrás si me equivoqué al editar?</p>
+    <p class="resp">No hay un botón para deshacer. Si guardaste algo que no querías,
+       escribinos y lo restauramos.</p>
+  </div>
+
+  <div class="faq">
+    <p class="preg">¿Alguien más puede entrar al panel?</p>
+    <p class="resp">Por ahora hay un solo usuario. Si necesitás que entren otras
+       personas con su propio acceso, decinos.</p>
+  </div>
+
+  <div class="faq">
+    <p class="preg">Me olvidé la contraseña.</p>
+    <p class="resp">Escribinos y te generamos una nueva.</p>
+  </div>
+
+  <div class="cierre">
+    Cualquier duda que no esté acá, escribinos y la resolvemos.
+    <img class="logo-klg" src="logo-klg.png" alt="KLG Desarrollos Tecnológicos">
+  </div>
+</section>
+</div>
+
+</body>
+</html>
