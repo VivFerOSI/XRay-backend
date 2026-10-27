@@ -94,8 +94,11 @@
   ul { margin: 0 0 3mm; padding-left: 5mm; }
   li { margin-bottom: 1.5mm; }
   strong { color: var(--navy); font-weight: 600; }
-  section { margin-bottom: 9mm; }
-  section.salto { page-break-before: always; }
+  section { margin-bottom: 10mm; }
+  /* Un título nunca queda solo al pie de una página, ni separado de su
+     primer párrafo. */
+  h2, h3 { page-break-after: avoid; break-after: avoid; }
+  h2 + p, h3 + p, h2 + ol, h3 + ul { page-break-before: avoid; }
 
   /* ── Elementos ── */
   .pasos { counter-reset: paso; list-style: none; padding: 0; margin: 0 0 4mm; }
@@ -272,7 +275,7 @@
   <p>El archivo se abre directamente en Excel, con los acentos correctos.</p>
 </section>
 
-<section class="salto">
+<section>
   <h2>Cuestionarios</h2>
   <p>Acá podés cambiar lo que dice cada cuestionario.
      <strong>Los cambios se ven en el sitio al instante</strong>, sin esperar a que
@@ -309,7 +312,7 @@
   </ul>
 </section>
 
-<section class="salto">
+<section>
   <h2>Evaluaciones 360°</h2>
   <p>Una evaluación 360° es cuando alguien que ya hizo su autoevaluación invita a
      hasta <strong>3 personas de su equipo</strong> a responder las mismas
@@ -363,7 +366,7 @@
   </ul>
 </section>
 
-<section class="salto">
+<section>
   <h2>Preguntas frecuentes</h2>
 
   <div class="faq">
